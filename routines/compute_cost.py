@@ -28,3 +28,27 @@ def compute_approx_cost(nargin, term, numberline, num_term_pt, end_category, nd,
 
 	return c
 
+
+def compute_cost_size_principle(upper_lim, need_prob):
+	l = len(nd)
+	unit_cost = [0] * l 
+	for i in range(upper_lim):
+		unit_cost[i] = -math.log(1/(1 - (upper_lim + 1) + 1), 2)	
+
+	return sum(numpy.multiply(need_prob, unit_cost))
+
+
+def compute_cost_size_principle_arb(modemap, need_prob):
+	l = len(nd)
+	unit_cost = [0] * 1
+	modemap_set = set(modemap)
+	unique_cat = modemap_set
+	
+	for i in range(len(unique_cat)):
+		inds = [j for (j, val) in enumerate(modemap) if modemap[j] == unique_cat[i]] 
+		for ind in inds:
+			unit_cost[ind] = -math.log(1/len(inds))
+
+	return sum(numpy.multiply(need_prob, unit_cost))
+			
+	
