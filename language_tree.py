@@ -2,8 +2,7 @@ from anytree import Node, RenderTree, LevelOrderIter
 from anytree.dotexport import RenderTreeGraph
 from anytree.exporter import DotExporter
 import os
-import langstrategy
-
+from langstrategy import *
 
 def make_tree(form, numexp, op):
 	"""Makes a tree for the given expression, where the left subtree represents the form and the right subtree represents the expression."""
@@ -49,6 +48,9 @@ def make_tree(form, numexp, op):
 	elif op == "POW":
 	    raise NotImplementedError
 
+	elif op == "MULADD":
+	    raise NotImplementedError
+    
 	return root
 
 def build_language(langcode, prnt=False):
@@ -60,9 +62,12 @@ def build_language(langcode, prnt=False):
             print("Please enter a valid language code (see complexities/langcodes.txt)")
 	    return
 	
-	strategy = langstrategy.langcode()
-	strategy.calc_complexity()
-	strategy.print_grammar()
+	strat_res = eval(langcode)()
+  	
+	if prnt:
+	    forest_disp(strat_res, langcode)
+	#strategy.calc_complexity()
+	#strategy.print_grammar()
 	return 
 
 def calc_complexity_base(tree):
@@ -79,11 +84,13 @@ def forest_disp(forest, langcode):
 	if not os.path.exists(langcode):
 	    os.makedirs(langcode)
 	for i, tree in enumerate(forest, 1):
+	   print("dfsf")
 	   disp(tree, langcode + "/" +  str(i))
 	return 	
 
 if __name__ == "__main__":
-	build_language("xdl")
+	build_language("abk", True)
+	assert False
 	t = make_tree("one", 1, "ONE")
 	t1 = make_tree(["u", "ty"], ["u", 10], "MUL")
 	t2 = make_tree("four", 4, "SUC")
