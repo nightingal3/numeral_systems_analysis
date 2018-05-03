@@ -57,8 +57,8 @@ def build_language(langcode, prnt=False):
 	f.close()
 
 	if langcode not in langcodes:
-        print("Please enter a valid language code (see complexities/langcodes.txt)")
-		return
+            print("Please enter a valid language code (see complexities/langcodes.txt)")
+	    return
 	
 	strategy = langstrategy.langcode()
 	strategy.calc_complexity()
@@ -74,7 +74,13 @@ def disp(tree, filename=None):
 	if filename:
 	   RenderTreeGraph(tree).to_picture(os.path.abspath(filename + ".png"))
 	return RenderTree(tree)
-	
+
+def forest_disp(forest, langcode):
+	if not os.path.exists(langcode):
+	    os.makedirs(langcode)
+	for i, tree in enumerate(forest, 1):
+	   disp(tree, langcode + "/" +  str(i))
+	return 	
 
 if __name__ == "__main__":
 	build_language("xdl")
