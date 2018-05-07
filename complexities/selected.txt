@@ -18,3 +18,7 @@ wsk
 wch
 yid
 xoo
+eng
+mnd
+ain
+geo

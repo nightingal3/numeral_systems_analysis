@@ -28,7 +28,7 @@ def ain():
     terms = ["sine", "tu", "re", "ine", "asikne"]
     
     forest = first_three(forest, terms)
-    forest = successors(forest, terms, 3, 6)
+    forest = successors(forest, terms, 3, 5)
     #10
     forest.append(make_tree("wan", ["tu", "asikne"], "MUL")) 	
     #6-9
@@ -38,20 +38,14 @@ def ain():
     forest.append(make_tree(["sine", "pesan"], ["wan", "sine"], "SUB"))
     #20
     forest.append(make_tree("hotne", ["tu", "wan"], "MUL"))
-    
-    for c in range(30, 100, 20):
-	forest.append(make_tree(["wan", "e", "w", "hotne"], ["w", "hotne", "wan"], "MULSUB"))
+    forest.append(make_tree(["wan", "e", "w", "hotne"], ["w", "hotne", "wan"], "MTS"))
+    forest.append(make_tree(["w", "hotne"], ["w", "hotne"], "MUL"))
+    forest.append(make_tree(["v", "ikasma", "u"], ["v", "u"], "ADD"))
 
-    for c in range(40, 120, 20):
-	forest.append(make_tree(["w", "hotne"], ["w", "hotne"], "MUL"))
-
-    for c in range(11, 110, 11):
-	forest.append(make_tree(["v", "ikasma", "u"], ["v", "u"], "ADD"))
-
-    forest = mem_set(forest, ["tu", "re", "ine", "asikne"])
-    forest = mem_set(forest, ["sine", "tu", "re", "ine", "asikne", "iwan", "arwan", "tupesan", "sinepesan"])
-    forest = mem_set(forest, ["wan", "hotne", "wan e tu hotne", "tu hotne", "wan e re hotne", "re hotne", "wan e ine hotne",
-                     "ine hotne", "wan e asikne hotne"])
+    forest.append(make_tree("u", ["tu", "re", "ine", "asikne"], "MEM"))
+    forest.append(make_tree("v", ["sine", "tu", "re", "ine", "asikne", "iwan", "arwan", "tupesan", "sinepesan"], "MEM"))
+    forest.append(make_tree("w", ["wan", "hotne", "wan e tu hotne", "tu hotne", "wan e re hotne", "re hotne", "wan e ine hotne",
+                     "ine hotne", "wan e asikne hotne"], "MEM"))
     return forest
 
 
@@ -110,9 +104,11 @@ def eng():
     forest = successors(forest, terms, 3, 12)
     forest.append(make_tree(["w", "teen"], ["w", "ten"], "ADD"))
     forest.append(make_tree(["u", "ty"], ["u", "ten"], "MUL"))
-    forest.append(make_tree(["u", "ty", "v"], ["u", "ten", "v"], "MTA"))
+    forest.append(make_tree(["u", "-", "ty", "v"], ["u", "ten", "v"], "MTA"))
     forest.append(make_tree("hundred", ["ten", "two"], "POW"))
-    forest = mem_set(forest, ["thir", "four", "fif", "six", "seven", "eigh", "nine", "twen", "thir", "for", "fif", "six", "seven", "eigh", "nine", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
+    forest.append(make_tree("u", ["thir", "four", "fif", "six", "seven", "eigh", "nine"], "MEM"))
+    forest.append(make_tree("v", ["twen", "thir", "for", "fif", "six", "seven", "eigh", "nine"], "MEM"))
+    forest.append(make_tree("w", ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"], "MEM"))
     forest.append(make_tree("twen", "two", "EQU"))
     forest.append(make_tree("thir", "three", "EQU"))
     forest.append(make_tree("for", "four", "EQU"))
@@ -128,16 +124,20 @@ def geo():
 
     forest = first_three(forest, terms)
     forest = successors(forest, terms, 3, 10)
-    forest.append(make_tree(["ca", "-", "met", "-i"], ["w", "at-i"], "ADD"))
+    forest.append(make_tree(["t", "-", "w", "met"], ["w", "at-i"], "ADD"))
+    forest.append(make_tree(["ca", "-", "met", "-i"], ["sam-i", "at-i"], "ADD"))
     forest.append(make_tree(["cvid", "-", "met", "-i"], ["svid-i", "at-i"], "ADD"))
     forest.append(make_tree(["cxra", "-", "met", "-i"], ["cxra", "at-i"], "ADD"))
     forest.append(make_tree("oc-i", ["or-i", "at-i"], "MUL"))
+    forest.append(make_tree(["or", "-", "m", "-", "oc-i"], ["or-i", "oc-i"], "MUL"))
+    forest.append(make_tree(["sam", "-", "oc-i"], ["sam-i", "oc-i"], "MUL"))
+    forest.append(make_tree(["otx", "-", "m", "-", "oc-i"], ["otx-i", "oc-i"], "MUL"))
     forest.append(make_tree(["v", "da", "-", "u"], ["v", "u"], "ADD"))
     forest.append(make_tree("as-i", ["at-i", "or-i"], "POW"))
-    forest = mem_set(forest, ["ert -i", "or -i", "otx -i", "xut -i", "ekvs -i", "vra -i"])
-    forest = mem_set(forest, ["oc-", "or-m-oc", "sam-oc-", "otx-m-oc"])
-    forest = mem_set(forest, ["1-[digit for brevity]", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"
-                              , "14", "15", "16", "17", "18", "19"])
+    forest.append(make_tree("w", ["ert -i", "or -i", "otx -i", "xut -i", "ekvs -i", "vra -i"], "MEM"))
+    forest.append(make_tree("v", ["oc-", "or-m-oc", "sam-oc-", "otx-m-oc"], "MEM"))
+    forest.append(make_tree("u", ["1-[digit for brevity]", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"
+                              , "14", "15", "16", "17", "18", "19"], "MEM"))
 
     return forest
 
@@ -154,7 +154,7 @@ def goo():
     for c in range(2, 4):
         forest.append(make_tree(terms[c], c+1, "GAU"))
 
-    forest.append(make_tree(terms[4], [6, 100], "HIG"))
+    forest.append(make_tree(terms[4], 7, "GAU"))
 
     return forest
 
@@ -173,10 +173,10 @@ def hix():
 def hpd():
     #num_type = 1
     forest = []
-    terms = ["?ayup", "ko?ap", "mora?ap", "babni" "?aedapuh"]
+    terms = ["?ayup", "ko?ap", "mora?ap", "babni", "?aedapuh"]
 
     forest = first_three(forest, terms)
-    forest = successors(forest, terms, 3, 4)
+    forest = successors(forest, terms, 3, 5)
     forest.append(make_tree(["cap", "cob", "popog"], ["?aedapuh", "?ayup"], "ADD"))
     forest.append(make_tree(["u", "cob", "cakget"], ["?u", "?aedapuh"], "ADD"))
     forest.append(make_tree(["cob", "ni-", "hu?"], ["?aedapuh", "ko?ap"], "MUL"))
@@ -184,7 +184,8 @@ def hpd():
     forest.append(make_tree(["?ayup", "jib", "hu?"], ["?aedapuh", "mora?ap"], "MUL"))
     forest.append(make_tree(["jib", "ni-", "hu?"], ["?aedapuh", "babni"], "MUL"))
     forest.append(make_tree("jib ni-hu?", [21, 100], "HIG"))
-    forest = mem_set(forest, ["ko?ap", "mora?ap", "babni", "form(another)", "ko?ap", "mora?ap", "babni"])
+    forest.append(make_tree("u", ["ko?ap", "mora?ap", "babni"], "MEM"))
+    forest.append(make_tree("v",["form(another)", "ko?ap", "mora?ap", "babni"], "MEM"))
     forest.append(make_tree("form(another", "?ayup", "EQU")) 
 
     return forest
@@ -220,12 +221,14 @@ def mnd():
     terms = ["yil", "er4", "san1", "si4", "wu3", "liu4", "qil", "ba1", "jiu3", "shi2"]
     
     forest = first_three(forest, terms)
-    forest = successors(forest, terms, 3, 9)
+    forest = successors(forest, terms, 3, 10)
     forest.append(make_tree(["w", "shi2"], ["w", "shi2"], "MUL"))
     forest.append(make_tree(["u", "v"], ["u", "v"], "ADD"))
     forest.append(make_tree("bai3", ["shi2", "er4"], "POW"))
 
-    forest = mem_set(["er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3", "shi2", "er4shi2", "san1shi2", "si4shi2", "wu3shi2", "liu4shi2", "qi1shi2", "ba1shi2", "jiu3shi2", "yi1", "er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3"]) 
+    forest.append(make_tree("u", ["er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3"], "MEM"))
+    forest.append(make_tree("v", ["shi2", "er4shi2", "san1shi2", "si4shi2", "wu3shi2", "liu4shi2", "qi1shi2", "ba1shi2", "jiu3shi2"], "MEM"))
+    forest.append(make_tree("w", ["yi1", "er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3"], "MEM"))
     
     return forest	
 
@@ -304,22 +307,22 @@ def wsk():
     forest = first_three(forest, terms)
     
     forest.append(make_tree(["w", "-", "w"], ["w", "w"], "ADD"))
-    forest.append(make_tree(["w-w", "itoketa"], ["w", "w", "itoketa"], "ADD"))
+    forest.append(make_tree(["w", "-", "w", "itoketa"], ["w-w", "itoketa"], "ADD"))
     forest.append(make_tree(["iteltoke", "-", "iteltoke", "-", "itelala"], ["iteltoke-iteltoke", "itelala"], "ADD"))
     forest.append(make_tree(["kuting", "dilisan", "sa", "itelala", "-", "itelala"], ["itelala-itelala-itoketa", "itelala-itelala"], "ADD"))
     forest.append(make_tree(["kuting", "dilisan", "-", "dilisan"], ["itelala-itelala-itoketa", "itelala"], "MUL"))
     forest.append(make_tree("kuting dilisan-dilisan", [11, 100], "HIG"))
-    forest = mem_set(forest, ["itelala", "iteltoke"])
+    forest.append(make_tree("u", ["itelala", "iteltoke"], "MEM"))
 
     return forest
 
 def wch():
     #num_type = 1
     forest = []
-    terms = ["wenyala", "tagw", "najtefwayal", "fwantes ihi", "qwe wenyal", "ipofwustoj", "ipofwusfwaya el", "ipofwusfwantes ihi", "oqwecho taqs"]
+    terms = ["wenyala", "tagw", "najtefwayal", "fwantes ihi", "qwe wenyal", "ipofwuj", "ipofwustoj", "ipofwusfwaya el", "ipofwusfwantes ihi", "oqwecho taqs"]
 
     forest = first_three(forest, terms)
-    forest = successors(forest, terms, 3, 9)
+    forest = successors(forest, terms, 3, 10)
     forest.append(make_tree(terms[8], [11, 100], "HIG"))
 
     return forest
@@ -331,7 +334,7 @@ def yid():
 
     forest = first_three(forest, terms)
     forest = successors(forest, terms, 3, 5)
-
+    forest.append(make_tree("mala", [6, 100], "HIG"))
     return forest
 
 
@@ -359,12 +362,6 @@ def first_three(forest, terms):
 def successors(forest, terms, start, end):
 	for c in range(start, end):
 		forest.append(make_tree(terms[c], c+1, "SUC"))
-
-	return forest
-
-def mem_set(forest, term_list):
-	for term in term_list:
-		forest.append(make_tree(term, term, "MEM"))
 
 	return forest
 

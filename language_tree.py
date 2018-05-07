@@ -15,8 +15,12 @@ def make_tree(form, numexp, op):
 	#construct the tree according to the setting given. 
 	if op == "MEM":
 	    root = Node(form)
+	    in_set = Node(u'\u2208', parent=root)
+	    names = [i for i, f in enumerate(numexp)]
+	    for i in range(len(names)):
+		names[i] = Node(numexp[i], parent=in_set)
 
-	elif op == "ONE" or op == "EQV":
+	elif op == "ONE" or op == "EQU":
 	    if op == "EQV":
 		root = Node(u'\u2263')
 	    l = Node(form, parent=root)
@@ -24,8 +28,7 @@ def make_tree(form, numexp, op):
 	    
 	elif op == "GAU":
 		l = Node(form, parent=root)
-		r_root = Node("g", parent=root)
-		r_exp = Node(numexp, parent=r_root)
+		r_root = Node("g" + str(numexp), parent=root)
 
 	elif op == "SUC":
 		l = Node(form, parent=root)
@@ -38,13 +41,21 @@ def make_tree(form, numexp, op):
 	    r_c = Node(str(numexp[0]), parent=r)
 	
 	elif op in ["ADD", "SUB", "MUL", "DIV", "POW"]:
-	    if len(form) == 3:
+	    if isinstance(form, list) and len(form) == 3:
 	        l_root = Node(form[1], parent=root)
 		l_l = Node(form[0], parent=l_root)
 		l_r = Node(form[2], parent=l_root)
-	    else:
+	    elif isinstance(form, list) and len(form) > 3:
+		#not sure how to represent this linguistically, just put all the components on the left
+		names = [i for i, f in enumerate(form)]
+		print(names)
+		for i in range(len(form)):
+		    names[i] = Node(form[i], parent=root)
+	    elif isinstance(form, list):
 		l_root = Node(form[0], parent=root)
 		l_c = Node(form[1], parent=l_root)
+	    else:
+		l_root = Node(form, parent=root)
 	    if op == "ADD":
                 r_root = Node("+", parent=root)
 	    elif op == "SUB":
@@ -66,8 +77,10 @@ def make_tree(form, numexp, op):
             l_l_0 = Node(form[0], parent=l_root)
             l_l_1 = Node(form[1], parent=l_l_0)
             l_r = Node(form[3], parent=l_root)
-
-            r_root = Node("+", parent=root)
+	    if op == "MTA":
+                r_root = Node("+", parent=root)
+	    else:
+		r_root = Node("-", parent=root)
             r_l_r = Node(u'\u2715'.encode("utf-8"), parent=r_root)
             r_l_l = Node("m", parent=r_l_r)
             r_l_l_1 = Node(numexp[0], parent=r_l_l)
@@ -89,7 +102,8 @@ def build_language(langcode, prnt=False):
 	
 	strat_res = eval(langcode)()
   	complexity = calc_complexity(strat_res)
-
+	for t in strat_res:
+	   print(calc_complexity_base(t))
 	if prnt:
 	    forest_disp(strat_res, langcode)
 	return complexity 
@@ -119,6 +133,10 @@ def forest_disp(forest, langcode):
 	return 	
 
 if __name__ == "__main__":
+	#t = make_tree(["fsdf", "dsfsd", "-", "dsifhsd", "sfdf"], ["fsdf-dsfsd", "dsifhsd-sfdf"], "ADD")
+	#print(disp(t, "trial_multi"))
+	print(build_language("geo", True))
+ 	assert False
 	f = open("complexities/selected.txt", "r")
 	selected_25 = f.read().split('\r\n')
 	for l in selected_25:
