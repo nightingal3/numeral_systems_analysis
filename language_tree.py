@@ -13,7 +13,10 @@ def make_tree(form, numexp, op):
 	root = Node("=")
 	
 	#construct the tree according to the setting given. 
-	if op == "ONE" or op == "EQV":
+	if op == "MEM":
+	    root = Node(form)
+
+	elif op == "ONE" or op == "EQV":
 	    if op == "EQV":
 		root = Node(u'\u2263')
 	    l = Node(form, parent=root)
@@ -31,13 +34,17 @@ def make_tree(form, numexp, op):
 			
 	elif op == "HIG":			  	
 	    l = Node(form, parent=root)
-	    r = Node("...", parent=root)	
-	    r_l = Node(str(numexp[0]), parent=r)
-	    r_r = Node(str(numexp[1]), parent=r)
+	    r = Node(">", parent=root)	
+	    r_c = Node(str(numexp[0]), parent=r)
 	
 	elif op in ["ADD", "SUB", "MUL", "DIV", "POW"]:
-            l_root = Node(form[0], parent=root)
-            l_c = Node(form[1], parent=l_root)
+	    if len(form) == 3:
+	        l_root = Node(form[1], parent=root)
+		l_l = Node(form[0], parent=l_root)
+		l_r = Node(form[2], parent=l_root)
+	    else:
+		l_root = Node(form[0], parent=root)
+		l_c = Node(form[1], parent=l_root)
 	    if op == "ADD":
                 r_root = Node("+", parent=root)
 	    elif op == "SUB":
@@ -81,16 +88,22 @@ def build_language(langcode, prnt=False):
 	    return
 	
 	strat_res = eval(langcode)()
-  	
+  	complexity = calc_complexity(strat_res)
+
 	if prnt:
 	    forest_disp(strat_res, langcode)
-	#strategy.calc_complexity()
-	#strategy.print_grammar()
-	return 
+	return complexity 
 
 def calc_complexity_base(tree):
 	"""Calculates the complexity (defined by number of nodes)"""
 	return len([node for node in LevelOrderIter(tree)])
+
+
+def calc_complexity(forest):
+	total = 0
+	for tree in forest:
+		total += calc_complexity_base(tree)
+	return total
 
 
 def disp(tree, filename=None):
@@ -102,25 +115,13 @@ def forest_disp(forest, langcode):
 	if not os.path.exists(langcode):
 	    os.makedirs(langcode)
 	for i, tree in enumerate(forest, 1):
-	   print("dfsf")
 	   disp(tree, langcode + "/" +  str(i))
 	return 	
 
 if __name__ == "__main__":
-	f = make_tree("sdf", [3, 20], "HIG")
-	print(disp(f, "hig"))
-	assert False
-	t = make_tree("one", 1, "ONE")
-	t1 = make_tree(["u", "ty"], ["u", 10], "MUL")
-	t2 = make_tree("four", 4, "SUC")
-        t3 = make_tree(["w", "teen"], ["w", 10], "ADD")
-	t4 = make_tree("twen", 2, "EQV")
-        t5 = make_tree(["twen", "ty", "-", "one"], [2, 10, 1], "MTA")
-	print(disp(t))
-	print(disp(t1, "eng_xty"))
-	print(disp(t2, "eng_four"))
-        print(disp(t3, "eng_teen"))
-        print(disp(t5, "eng_mta"))
-	#print(disp(t4, "eng_eqv"))
-        print(calc_complexity_base(t3))
-	print(calc_complexity_base(t2))
+	f = open("complexities/selected.txt", "r")
+	selected_25 = f.read().split('\r\n')
+	for l in selected_25:
+	    print(l + ":")
+	    print(build_language(l, True))
+
