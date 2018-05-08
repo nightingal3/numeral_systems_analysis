@@ -10,16 +10,18 @@ def plot_need_probability(filepath, filepath_fit):
 	numberline = []
 	numberline.extend(range(1, 101))
 	raw = f.readlines()
-	fit = f.readlines()
-	raw_stripped = [s.strip() for s in raw]
-	fit_stripped = [s.strip() for s in fit]
-	print([float(i) for i in raw_stripped])
-	plt.plot(numberline, [float(i) for i in raw_stripped], color="grey", linewidth=2)
-	plt.plot(numberline, [float(i) for i in fit_stripped], color="black", linewidth=2)
+	fit = f1.readlines()
+	raw_stripped = np.array([s.strip() for s in raw])
+	fit_stripped = np.array([s.strip() for s in fit])
+	plt.plot(numberline, np.array([float(i) for i in raw_stripped]), color="grey", linewidth=2, label="Raw")
+	plt.plot(numberline, np.array([float(i) for i in fit_stripped]), color="black", linewidth=2, label="Smoothed")
+	plt.legend(loc="upper right", frameon=False)
 	plt.yscale("log")
 	plt.ylabel("Log probability")
 	plt.xlabel("Number line")
 	plt.savefig("needprobs.png")
+	f.close()
+	f1.close()
 
 
 if __name__ == "__main__":
