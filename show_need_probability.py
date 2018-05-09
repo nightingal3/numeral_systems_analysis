@@ -3,20 +3,22 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.axes as ax
 import numpy as np
+import math
 
 def plot_need_probability(filepath, filepath_fit):
 	f = open(filepath, "r")
 	f1 = open(filepath_fit, "r")
 	numberline = []
 	numberline.extend(range(1, 101))
+	#do some processing (do this with pandas later bc messy
 	raw = f.readlines()
 	fit = f1.readlines()
 	raw_stripped = np.array([s.strip() for s in raw])
 	fit_stripped = np.array([s.strip() for s in fit])
-	plt.plot(numberline, np.array([float(i) for i in raw_stripped]), color="grey", linewidth=2, label="Raw")
-	plt.plot(numberline, np.array([float(i) for i in fit_stripped]), color="black", linewidth=2, label="Smoothed")
+	plt.plot(numberline, np.array([math.log(float(i)) for i in raw_stripped]), color="grey", linewidth=2, label="Raw")
+	plt.plot(numberline, np.array([math.log(float(i)) for i in fit_stripped]), color="black", linewidth=2, label="Smoothed")
 	plt.legend(loc="upper right", frameon=False)
-	plt.yscale("log")
+	
 	plt.ylabel("Log probability")
 	plt.xlabel("Number line")
 	plt.savefig("needprobs.png")
