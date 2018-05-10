@@ -35,8 +35,8 @@ def collect_lang_data(filepath):
 def plot_languages(langdict, numberline):
 	for lang in langdict:
 		info = []
-		for i in langdict[lang]:
-			info.append(langdict[lang][i])
+		for i in range(10):
+			info.append(langdict[lang][str(i)])
 		sum_info = sum(info)
 		n_info = [float(i) / (sum(info)) for i in info]
 		plt.plot(numberline, n_info, label=lang)
