@@ -13,17 +13,17 @@ from language_tree import *
 
 
 def acg():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["bague", "chamai", "matalii"]
 
     forest = first_three(forest, terms)
     forest.append(make_tree(terms[2], [4, 100], "HIG"))
 
-    return forest 
+    return forest, num_type 
 
 def ain():
-    #num_type = 4
+    num_type = 4
     forest = []
     terms = ["sine", "tu", "re", "ine", "asikne"]
     
@@ -46,11 +46,11 @@ def ain():
     forest.append(make_tree("v", ["sine", "tu", "re", "ine", "asikne", "iwan", "arwan", "tupesan", "sinepesan"], "MEM"))
     forest.append(make_tree("w", ["wan", "hotne", "wan e tu hotne", "tu hotne", "wan e re hotne", "re hotne", "wan e ine hotne",
                      "ine hotne", "wan e asikne hotne"], "MEM"))
-    return forest
+    return forest, num_type
 
 
 def ana():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["peada", "betacata", "quimisha"]
 
@@ -58,11 +58,11 @@ def ana():
 
     forest.append(make_tree(["quimsha", "beta"], [4, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 
 def awp():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["maza", "pas", "kutna", "ambara"]
 
@@ -71,10 +71,10 @@ def awp():
     forest.append(make_tree("ambara", 4, "SUC"))
     forest.append(make_tree("ambara", [5, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def brs():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["sig-u/o", "hua-ra", "idia-ra", "babarirak-u/o", "kohobokarak-u/o"]
 
@@ -82,10 +82,10 @@ def brs():
     forest = successors(forest, terms, 3, 5)
     forest.append(make_tree(terms[4], [6, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def bae():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["baku-nakaji", "biku-nama", "kijiku-nama"]
 
@@ -93,10 +93,10 @@ def bae():
 
     forest.append(make_tree(terms[2], [4, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def eng():
-    #num_type = 6
+    num_type = 6
     forest = []
     terms = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"]
 
@@ -115,10 +115,10 @@ def eng():
     forest.append(make_tree("fif", "five", "EQU"))
     forest.append(make_tree("eigh", "eight", "EQU"))
 
-    return forest
+    return forest, num_type
 
 def geo():
-    #num_type = 5
+    num_type = 5
     forest = []
     terms = ["ert-i", "or-i", "sam-i", "otx-i", "xut-i", "ekvs-i", "svid-i", "rva", "cxra", "at-i"]
 
@@ -139,12 +139,12 @@ def geo():
     forest.append(make_tree("u", ["1-[digit for brevity]", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"
                               , "14", "15", "16", "17", "18", "19"], "MEM"))
 
-    return forest
+    return forest, num_type
 
 
 
 def goo():
-    #num_type = 0
+    num_type = 0
     forest = []
     terms = ["yoowarni", "garndiwiddidi", "ngarloodoo", "marla", "many"]
 
@@ -156,11 +156,11 @@ def goo():
 
     forest.append(make_tree(terms[4], 7, "GAU"))
 
-    return forest
+    return forest, num_type
 
 
 def hix():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["towenyxa", "asako", "osorwawo"]
 
@@ -168,10 +168,10 @@ def hix():
     
     forest.append(make_tree(terms[2], [4, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def hpd():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["?ayup", "ko?ap", "mora?ap", "babni", "?aedapuh"]
 
@@ -188,11 +188,11 @@ def hpd():
     forest.append(make_tree("v",["form(another)", "ko?ap", "mora?ap", "babni"], "MEM"))
     forest.append(make_tree("form(another", "?ayup", "EQU")) 
 
-    return forest
+    return forest, num_type
 
 
 def imo():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["mugasl", "sabla", "sabla mugo", "sabla sabla", "sabla sabla mugo"]
 
@@ -200,10 +200,10 @@ def imo():
     forest = successors(forest, terms, 3, 5)
     forest.append(make_tree(terms[4], [6, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def kay():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["warngiida", "kiyarrngka", "burldamurra", "mirdinda", "muthaa"]
 
@@ -212,11 +212,11 @@ def kay():
     forest.append(make_tree(terms[3], 4, "SUC"))
     forest.append(make_tree(terms[4], [5, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 
 def mnd():
-    #num_type = 6
+    num_type = 6
     forest = []
     terms = ["yil", "er4", "san1", "si4", "wu3", "liu4", "qil", "ba1", "jiu3", "shi2"]
     
@@ -230,11 +230,11 @@ def mnd():
     forest.append(make_tree("v", ["shi2", "er4shi2", "san1shi2", "si4shi2", "wu3shi2", "liu4shi2", "qi1shi2", "ba1shi2", "jiu3shi2"], "MEM"))
     forest.append(make_tree("w", ["yi1", "er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3"], "MEM"))
     
-    return forest	
+    return forest, num_type	
 
     
 def myi():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["yawumbawa", "yabaranwa", "yabalawa"]
     
@@ -242,10 +242,10 @@ def myi():
     
     forest.append(make_tree(terms[2], [4, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def mrt():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["kalika", "kayarra", "jarrkurti", "maruwarla"]
 
@@ -253,11 +253,11 @@ def mrt():
     
     forest.append(make_tree(terms[3], [4, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 
 def pit():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["kutju", "kutjara", "mankurpa"]
     
@@ -265,22 +265,22 @@ def pit():
     
     forest.append(make_tree(terms[2], [4, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 
 def prh():
-    #num_type = 0
+    num_type = 0
     forest = []
     
     forest.append(make_tree("hoi_1", 1, "GAU"))
     forest.append(make_tree("hoi_2", [2, 4], "GAU"))
     forest.append(make_tree("aibaagi", [5, 100], "GAU"))
 
-    return forest
+    return forest, num_type
 
 
 def ram():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["saimig", "puksak", "pansak", "kugkugbi", "kwikistar"]
 
@@ -288,19 +288,20 @@ def ram():
     forest = successors(forest, terms, 3, 5)
     forest.append(make_tree(terms[4], [6, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def war():
+    num_type = 0
     forest = []
     
     forest.append(make_tree("xica pe", 1, "ONE"))
     forest.append(make_tree("dois", 2, "GAU"))
     forest.append(make_tree("many", [3, 100], "GAU"))
  
-    return forest
+    return forest, num_type
 
 def wsk():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["itoketa", "itelala", "iteltoke"]
 
@@ -314,10 +315,10 @@ def wsk():
     forest.append(make_tree("kuting dilisan-dilisan", [11, 100], "HIG"))
     forest.append(make_tree("u", ["itelala", "iteltoke"], "MEM"))
 
-    return forest
+    return forest, num_type
 
 def wch():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["wenyala", "tagw", "najtefwayal", "fwantes ihi", "qwe wenyal", "ipofwuj", "ipofwustoj", "ipofwusfwaya el", "ipofwusfwantes ihi", "oqwecho taqs"]
 
@@ -325,21 +326,21 @@ def wch():
     forest = successors(forest, terms, 3, 10)
     forest.append(make_tree(terms[8], [11, 100], "HIG"))
 
-    return forest
+    return forest, num_type
 
 def yid():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["guman", "jambul", "dagul", "yunggan gunyjii", "mala"]
 
     forest = first_three(forest, terms)
     forest = successors(forest, terms, 3, 5)
     forest.append(make_tree("mala", [6, 100], "HIG"))
-    return forest
+    return forest, num_type
 
 
 def xoo():
-    #num_type = 1
+    num_type = 1
     forest = []
     terms = ["?ua(p)", "num(p)", "ae(p)"]
 
@@ -347,7 +348,7 @@ def xoo():
 
     forest.append(make_tree(terms[2], [4, 100], "HIG"))
   
-    return forest
+    return forest, num_type
 
 
 
