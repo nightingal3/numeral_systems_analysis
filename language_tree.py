@@ -100,13 +100,13 @@ def build_language(langcode, prnt=False):
             print("Please enter a valid language code (see complexities/langcodes.txt)")
 	    return
 	
-	strat_res = eval(langcode)()
+	strat_res, num_type = eval(langcode)()
   	complexity = calc_complexity(strat_res)
 	for t in strat_res:
 	   print(calc_complexity_base(t))
 	if prnt:
 	    forest_disp(strat_res, langcode)
-	return complexity 
+	return complexity, num_type
 
 def calc_complexity_base(tree):
 	"""Calculates the complexity (defined by number of nodes)"""
@@ -132,14 +132,23 @@ def forest_disp(forest, langcode):
 	   disp(tree, langcode + "/" +  str(i))
 	return 	
 
+def print_grammar(forest, num_type, langcode):
+	num_types = {"0": "restricted approximate", "1": "restricted exact", "2": "body part", "3": "other base", "4": "vigesimal", "5": "hybrid", "6": "decimal"}
+	langcodes = {"acg": "Achagua", "ain": "Ainu", "ana": "Araona", "awp": "Awa Pit", "brs": "Barasuno", "bae": "Bar" + u'\u00E9', "eng": "English", "geo": "Georgian", "goo": "Gooniyandi", "hix": "Hixkaryana", "hpd": "Hup", "imo": "Imonda", "kay": "Kayardild", "mnd": "Mandarin", "myi": "Mangarrayi", "mrt": "Martuthunira", "pit": "Pitjantjatjara", "prh": "Pirah" u'\u00E3', "ram": "Rama", "war": "Wari", "wsk": "Waskia", "wch": "Wichu'00ED'", "yid": "Yidiny", "xoo": u'\u0021' + "X" + u'\u00F3' + u'\u00F5'}
+	
+	print(langcodes[langcode] + ": \t {")
+	print("type: " + num_types[str(num_type)])
+	print("}")
+	return 
+
 if __name__ == "__main__":
 	#t = make_tree(["fsdf", "dsfsd", "-", "dsifhsd", "sfdf"], ["fsdf-dsfsd", "dsifhsd-sfdf"], "ADD")
 	#print(disp(t, "trial_multi"))
-	print(build_language("geo", True))
+	"""print(build_language("geo", True))
  	assert False
 	f = open("complexities/selected.txt", "r")
 	selected_25 = f.read().split('\r\n')
 	for l in selected_25:
 	    print(l + ":")
-	    print(build_language(l, True))
-
+	    print(build_language(l, True))"""
+	print_grammar(None, 1, "xoo")
