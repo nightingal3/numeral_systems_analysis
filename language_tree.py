@@ -2,7 +2,8 @@ from anytree import Node, RenderTree, LevelOrderIter
 from anytree.dotexport import RenderTreeGraph
 from anytree.exporter import DotExporter
 import os
-from langstrategy import *
+import inspect
+import langstrategy
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -92,24 +93,26 @@ def make_tree(form, numexp, op):
 	return root
 
 def build_language(langcode, prnt=False):
-	f = open(os.getcwd() + "/complexities/langlist.txt", "r+") 	
-	langcodes = f.read().split('\r\n')
-	f.close()
+	#f = open(os.getcwd() + "/complexities/langlist.txt", "r+") 	
+	#langcodes = f.read().split('\r\n')
+	#f.close()
+
+	langcodes = [i[0] for i in inspect.getmembers(langstrategy, inspect.isfunction) if len(i[0]) == 3]
 
 	if langcode not in langcodes:
             print("Please enter a valid language code (see complexities/langcodes.txt)")
 	    return
 	
-	strat_res, num_type = eval(langcode)()
+	strat_res, num_type, ulim = eval("langstrategy." + langcode)()
   	complexity = calc_complexity(strat_res)
 	for t in strat_res:
 	   print(calc_complexity_base(t))
 	if prnt:
 	    forest_disp(strat_res, langcode)
-	return complexity, num_type
+	return complexity, num_type, ulim
 
 def calc_complexity_base(tree):
-	"""Calculates the complexity (defined by number of nodes)"""
+	"""Calculates the complexity (defined by number of nodes)"""	
 	return len([node for node in LevelOrderIter(tree)])
 
 
@@ -139,6 +142,7 @@ def print_grammar(forest, num_type, langcode):
 	print(langcodes[langcode] + ": \t {")
 	print("type: " + num_types[str(num_type)])
 	print("}")
+	forest_disp(forest)
 	return 
 
 if __name__ == "__main__":
