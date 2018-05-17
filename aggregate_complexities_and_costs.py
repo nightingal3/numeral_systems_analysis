@@ -1,8 +1,12 @@
+import matplotlib
+matplotlib.use("Agg")
 import language_tree
 import langstrategy
 import inspect
 from routines import compute_cost_size_principle
 import numpy as np
+import math
+import matplotlib.pyplot as plt
 
 def aggregate_complexities():
 	info = {}
@@ -18,44 +22,62 @@ def aggregate_complexities():
 
 def aggregate_communicative_costs(need_probs, lang_info):
 	"""lang_info should be a dict organized as {lang:(comp, num_type)}"""
+	langs = lang_info.keys()
+	complexities = [i[1][0] for i in lang_info.items()]
 	lang_by_category = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []}
 	print(lang_info.items())
 	for item in lang_info.items():
 		lang_by_category[item[1][1]].append(item[0])	
 	costs = {}
+	ulim = {}
 
 	#Restricted approximate systems
 	for lang in lang_by_category[0]:
 		#costs[lang] = compute_cost_approx()
 		pass
 	#Restricted exact systems
+	
 	for lang in lang_by_category[1]:
-		ulim = [language_tree.build_language(lang)[2] for lang in lang_by_category[1]]
-		costs[lang] = update_with_cost(len(lang_by_category[1]), lang_info[lang], ulim, need_probs)
+		ulim[lang] = language_tree.build_language(lang)[2]
+		print(ulim)
+		costs[lang] = compute_cost_size_principle(ulim[lang], need_probs)
 
-	return costs
+	ret = {}
+	for lang in costs: #return as (complexity, cost, lang_type)
+		ret[lang] = (lang_info[lang][0], costs[lang], lang_info[lang][1])	
+	return ret
 
 
-def update_with_cost(N, lang_info, upper_lim, nd):
-	total_cost = 0
-	for i in range(N):
-		L_i = compute_cost_size_principle(upper_lim, nd)
-		Cost_i = math.log(L_i, 2)
-		Expected_i = nd[i] * Cost_i 
-		total_cost += Expected_i
+def update_with_cost(upper_lim, nd):
+	total_cost = compute_cost_size_principle(upper_lim, nd)
+	print(total_cost)
 	return total_cost	
 		
 		
-
+def plot_cost_vs_complexity(lang_info):
+	print(lang_info)
+	colorscheme = {1: "green", 6: "blue", 0: "red"}
+	for lang in lang_info:	
+		plt.plot([lang_info[lang][0]], [lang_info[lang][1]], label=lang, marker='o', color=colorscheme[lang_info[lang][2]], markersize=5)
+	
+	plt.xlabel("Complexity")
+	plt.ylabel("Communicative cost")
+	plt.savefig("cvc.png", dpi=1000)
+	return	
 
 if __name__ == "__main__":
 
 	c = aggregate_complexities()
-	f = open("data/need_probs/need_probs.csv")
-	need_probs = np.asarray([float(i) for i in f.read().split("\r\n")[:-1]])
+	f = open("data/need_probs/needprobs_eng_fit.csv")
+	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
 	#print(need_probs)
 	#print(c)
-	print(aggregate_communicative_costs(need_probs, c))
+	x = aggregate_communicative_costs(need_probs, c)
+	x["eng"] = (126, 0, 6)
+	x["mnd"] = (92, 0, 6)
+	x["geo"] = (167, 0, 6)
+	x["ain"] = (121, 0, 6)
+	plot_cost_vs_complexity(x)
 	#print(aggregate_communicative_costs())
 
 	
