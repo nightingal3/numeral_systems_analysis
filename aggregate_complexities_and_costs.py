@@ -3,7 +3,7 @@ matplotlib.use("Agg")
 import language_tree
 import langstrategy
 import inspect
-from routines import compute_cost_size_principle
+from routines import compute_cost_size_principle, compute_approx_cost
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -21,7 +21,8 @@ def aggregate_complexities():
 	return info
 
 def aggregate_communicative_costs(need_probs, lang_info):
-	"""lang_info should be a dict organized as {lang:(comp, num_type)}"""
+	"""lang_info should be a dict organized as {lang:(comp, num_type)}
+	* fix this mess later lol"""
 	langs = lang_info.keys()
 	complexities = [i[1][0] for i in lang_info.items()]
 	lang_by_category = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []}
@@ -33,13 +34,11 @@ def aggregate_communicative_costs(need_probs, lang_info):
 
 	#Restricted approximate systems
 	for lang in lang_by_category[0]:
-		#costs[lang] = compute_cost_approx()
-		pass
-	#Restricted exact systems
-	
+		costs[lang] = compute_approx_cost(term[i], numberline, num_term_pt, end_category[i], need_probs)
+		
+	#Restricted exact systems	
 	for lang in lang_by_category[1]:
 		ulim[lang] = language_tree.build_language(lang)[2]
-		print(ulim)
 		costs[lang] = compute_cost_size_principle(ulim[lang], need_probs)
 
 	ret = {}
@@ -47,15 +46,9 @@ def aggregate_communicative_costs(need_probs, lang_info):
 		ret[lang] = (lang_info[lang][0], costs[lang], lang_info[lang][1])	
 	return ret
 
-
-def update_with_cost(upper_lim, nd):
-	total_cost = compute_cost_size_principle(upper_lim, nd)
-	print(total_cost)
-	return total_cost	
-		
+	
 		
 def plot_cost_vs_complexity(lang_info):
-	print(lang_info)
 	colorscheme = {1: "green", 6: "blue", 0: "red"}
 	for lang in lang_info:	
 		plt.plot([lang_info[lang][0]], [lang_info[lang][1]], label=lang, marker='o', color=colorscheme[lang_info[lang][2]], markersize=5)

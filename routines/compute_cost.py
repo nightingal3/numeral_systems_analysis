@@ -1,5 +1,6 @@
 import numpy as np
 from get_term_num_matrix import get_term_num_matrix
+from compute_P_w_i_variants import *
 import math
 
 def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_range, w):
@@ -12,11 +13,12 @@ def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_rang
 	nnum = len(numberline)
 
 	term_num_map, nterm = get_term_num_matrix(term, nnum, num_term_pt, end_category, numberline)
-	print(term_num_map)
-	assert False
-	a = max(term_num_map)
-	mmap = term_num_map.index(a)
-	(mus, P_w_i_vec) = compute_P_w_i_match_modemap1(mmap, numberline, nterm, term_num_map, mu_range, c, w, nd)
+	a = np.amax(term_num_map, axis=0)
+	mmap = np.argmax(term_num_map, axis=0)
+	print(a)
+	print(mmap)
+	
+	(mus, P_w_i_vec) = compute_P_w_i_match_modemap(mmap, numberline, nterm, term_num_map, mu_range, c, w, nd)
 	
 	F_i_w_numerator = compute_f_i_w_numerator(nnum, nterm, numberline, mus, cc, w)
 	
@@ -59,6 +61,6 @@ def compute_cost_size_principle_arb(modemap, need_prob):
 			
 
 if __name__ == "__main__":
-	f = open("data/need_probs/needprobs_eng_fit.csv")
+	f = open("../data/need_probs/needprobs_eng_fit.csv")
 	nd = [float(i) for i in f.read().split("\r\n")[:-1]]
 	compute_approx_cost(["hoi1", "hoi2", "aibaagi"], [i for i in range(101)], [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, nd, [i for i in range(20)], 0.31)
