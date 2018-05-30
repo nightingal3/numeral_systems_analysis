@@ -12,22 +12,11 @@ def compute_P_w_i(nnum, ncat, numberline, mus, c, w):
 	BiasMat = np.tile(bias, (1, nnum))
 	
 	P_w_i_vec = np.divide(1, math.sqrt(2 * math.pi) * w * Means) * np.exp(np.divide(-np.square(Js-Means), 2 * np.square(w * Means)))
-	print(np.divide(1, math.sqrt(2 * math.pi) * w * Means))
-	print(np.exp(np.divide(-np.square(Js-Means), 2 * np.square(w* Means))))
-
+	
 	PP = np.multiply(P_w_i_vec, BiasMat)
 	Norm = PP.sum(axis=0)
 	P_w_i = np.divide(PP, np.tile(Norm, (ncat, 1)))
-	#print(mus)
-	#print("PWI")
-	#print(P_w_i_vec)
-	#print("BIASMAT")
-	#print(BiasMat)
-	#print("NORM")
-	#print(Norm)
-	#print("PP")
-	#print(PP)
-
+	
 	return P_w_i	
 	
 
@@ -38,7 +27,7 @@ def compute_P_w_i_match_modemap(cluster, numberline, nterm, term_num_map, mu_ran
 	nnum = len(numberline)
 	mu_placements = list(itertools.combinations(mu_range, nterm))
 	mu_placements = np.asarray(mu_placements)	
-	print(mu_placements)
+
 	minmse = float("inf")
 	best_P_w_i = None
 	P_w_i_vec = None
@@ -51,93 +40,52 @@ def compute_P_w_i_match_modemap(cluster, numberline, nterm, term_num_map, mu_ran
 		P_w_i = compute_P_w_i(nnum, nterm, numberline, mus, c, w)
 		maxPs = np.amax(P_w_i, axis=0)	
 		mode_cluster = np.argmax(P_w_i, axis=0)
-		mode_cluster = [i+1 for i in mode_cluster]
-		#print(P_w_i)
-		#print("shape")
-		#print(P_w_i.shape)
-		#print(maxPs)
-		#print(mode_cluster)
-		#print(cluster)
-		#print(maxPs)
+		mode_cluster = [a+1 for a in mode_cluster]
 			
-		#mindiff = sum(abs(mode_cluster - cluster))
-		mindiff = sum([abs(i - j) for i, j in zip(mode_cluster, cluster)])
-		print(mindiff)
+		mindiff = np.sum([abs(x - y) for x, y in zip(mode_cluster, cluster)])
+
+		
 		
 		if mindiff < minmse:
 			minmse = mindiff
 			mus_match = mus
 			P_w_i_vec = maxPs
-			best_P_w_i = P_w_i	
-
-	print(minmse)
-	print(mus_match)
-		
+			best_P_w_i = P_w_i
 
 	for i in range(mu_placements.shape[0]):
 		mus = mu_placements[i, :].reshape(-1, 1)
 		P_w_i = compute_P_w_i(nnum, nterm, numberline, mus, c, w)
 		maxPs = np.amax(P_w_i, axis=0)	
 		mode_cluster = np.argmax(P_w_i, axis=0)
-		mode_cluster = [i+1 for i in mode_cluster]
-		#print(mode_cluster)
-
-		times = 0
-		if sum([abs(x - y) for x, y in zip(mode_cluster, cluster)]) == mindiff:
-			print("DSFSFSDF")
-			print(i)
-			print(sum([abs(x-y) for x, y in zip(mode_cluster, cluster)]))
-			print("MAX PS")
-			print(maxPs)
-			print("MODE CLUSTER")
-			print(mode_cluster)
+		mode_cluster = [a+1 for a in mode_cluster]
+		
+		
+		if np.sum([abs(x - y) for x, y in zip(mode_cluster, cluster)]) == mindiff:
 			inds.append(i)
-			assert False
 			F_i_w_numerator = compute_f_i_w_numerator(nnum, nterm, numberline, mus, c, w)
-			#print(F_i_w_numerator.shape)
 			log_prob_L = np.zeros((1, nnum))
 			
-			for j in range(1, nterm+1):
-				cat_inds = find(cluster, j)
+			for j in range(nterm):
+				cat_inds = find(cluster, j + 1)
 				cat_sum = 0
-				print("j:" + str(j))
-				print("inds:")
-				print(cat_inds)
 				for ind in cat_inds:
-					cat_sum += F_i_w_numerator[j-1, ind]
+					cat_sum += F_i_w_numerator[j, ind]
 				for ind in cat_inds:
-					log_prob_L[0][ind] = F_i_w_numerator[j-1, ind] / cat_sum
-			print(log_prob_L)
+					if cat_sum != 0:
+						log_prob_L[0, ind] = F_i_w_numerator[j, ind] / cat_sum
+					else:
+						log_prob_L[0, ind] = 0
+
 			log_prob_L = np.log2(log_prob_L)
-			print("!!!!!")
-			print(sum((need_probs * -log_prob_L)[0]))
 			cvec.append(sum((need_probs * -log_prob_L)[0])) 
-			times += 1
 
-	#ind = inds[find(cvec==min(cvec), 1)]
-	print(cvec)
-	print(inds)
-	assert False
-	print("TIMES")
-	print(times)
-	print(len(inds))
-	#print(np.where(cvec[0] == (min(cvec[0]))))
-	print(min(cvec))
-	print(np.where(cvec == min(cvec))[0])
-	ind_list = np.where(cvec == min(cvec))[0]
-	ind = []
-	for i in ind_list:
-		ind.append(inds[i])
-	print(ind_list)
-	mus_match = []
-	for ind in ind_list:
-		mus_match.append(mu_placements[ind, :][0].transpose())
-
-	P_w_i = compute_P_w_i(nnum, nterm, numberline, mus_match, c, w)
+	
+	ind = inds[find(cvec, min(cvec))[0]]
+	mus_match = mu_placements[i, :]
+	P_w_i = compute_P_w_i(nnum, nterm, numberline, np.asarray(mus_match).reshape((-1, 1)), c, w)
 	maxPs = np.amax(P_w_i)
 	modeclust = np.argmax(P_w_i)
-			
-	print(mus_match)
+	
 	return mus_match, P_w_i_vec
 	
 
@@ -145,8 +93,8 @@ def compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subr
 	numberline = []
 	numberline.extend(range(1, 16))
 	Js = np.tile(numberline, (ncat, 1))
-	means = np.tile(np.array(mus), (nnum, 1)).transpose()
-	bias_mat = np.tile(np.array(bias), (nnum, 1)).transpose()
+	means = np.tile(np.array(mus), (nnum, 1))
+	bias_mat = np.tile(np.array(bias), (1, nnum))
 	
 	f_i_w = np.multiply(np.divide(1, np.multiply(math.sqrt(2*math.pi)*w, means)),np.exp(np.divide(-(Js-means)** 2 ,  2 * (w*means)** 2)))
 
@@ -170,10 +118,16 @@ def compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subr
 
 
 def compute_f_i_w_numerator(nnum, ncat, numberline, mus, cc, w):
+	mus = np.asarray(mus).reshape((-1, 1))
 	Js = np.tile(numberline, (ncat, 1))
 	Means = np.tile(mus, (1, nnum))
+	#mus = np.asarray(mus).reshape((-1, 1))
+	#assert False
 	f_i_w_vec = np.divide(1, math.sqrt(2*math.pi) * w * Means) * np.exp(-(Js - Means) ** 2 / (2 * (w * Means) ** 2))
 	
+	#f_i_w_vec = np.multiply(np.divide(1, np.multiply(math.sqrt(2*math.pi)*w, Means)),np.exp(np.divide(-(Js-Means)** 2 ,  2 * (w*Means)** 2)))
+
+
 	return f_i_w_vec
 
 if __name__ == "__main__":
@@ -181,6 +135,6 @@ if __name__ == "__main__":
 	f = open("../data/need_probs/needprobs_eng_fit.csv")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
 	term_num_map = get_term_num_matrix(["hoi1", "hoi2", "aibaagi"], 100, [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, [i for i in range(1, 101)])
-
+	#print(compute_f_i_w_numerator(100, 3, [i for i in range(1, 101)], np.asarray([18, 19, 20]).transpose(), 2.2810, 0.31))
 	print(compute_P_w_i_match_modemap([1, 2, 2, 2] + [3] * 96, [i for i in range(1, 101)], 3, term_num_map, [i for i in range(1, 21)], 2.2810, 0.31, need_probs))
 	#print(compute_P_w_i_correct_subitized(15, 8, [1, 2, 3, 4, 5, 6, 7, 8], 2.2810, 0.31, [1, 1, 1, 1, 0.9, 0.83, 0.75, 0.79, 0.72, 0.89, 0.89, 0.84, 0.84, 0.83, 0.78], [1, 2, 3], [0.0741029641185647, 0.0780031201248050, 0.0842433697347894, 0.0811232449297972, 0.0639625585023401, 0.333073322932917, 0.0257410296411857, 0.259750390015601]))	
