@@ -3,7 +3,7 @@ matplotlib.use("Agg")
 import language_tree
 import langstrategy
 import inspect
-from routines import compute_cost_size_principle, compute_approx_cost
+from routines import compute_cost_size_principle, compute_cost
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -26,7 +26,10 @@ def aggregate_communicative_costs(need_probs, lang_info):
 	langs = lang_info.keys()
 	complexities = [i[1][0] for i in lang_info.items()]
 	lang_by_category = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []}
-	print(lang_info.items())
+	term = {"prh": ["hoi_1", "hoi_2", "aibaagi"], "war": ["xica pe", "dois"], "goo": ["yoowarni", "garndiwiddidi", "ngarloodoo", "marla"]} #get rid of hardcoding here
+	num_term_pt = {"prh":[1, 2, 2, 2, 3, 3, 3, 3, 3, 3], "war": [1, 2], "goo": [1, 2, 3, 3, 4]}
+	end_category = {"prh": 0, "war": 1, "goo": 1}
+	numberline = [i for i in range(1, 101)]
 	for item in lang_info.items():
 		lang_by_category[item[1][1]].append(item[0])	
 	costs = {}
@@ -34,8 +37,15 @@ def aggregate_communicative_costs(need_probs, lang_info):
 
 	#Restricted approximate systems
 	for lang in lang_by_category[0]:
-		costs[lang] = compute_approx_cost(term[i], numberline, num_term_pt, end_category[i], need_probs)
-		
+		print("lang")
+		print(lang)
+		print("mum_term_pt")
+		print(num_term_pt[lang])
+		print("end_category")
+		print(end_category[lang])
+		costs[lang] = compute_cost.compute_approx_cost(term[lang], numberline, num_term_pt[lang], end_category[lang], need_probs)
+		print(costs[lang])	
+			
 	#Restricted exact systems	
 	for lang in lang_by_category[1]:
 		ulim[lang] = language_tree.build_language(lang)[2]
@@ -50,6 +60,7 @@ def aggregate_communicative_costs(need_probs, lang_info):
 		
 def plot_cost_vs_complexity(lang_info):
 	colorscheme = {1: "green", 6: "blue", 0: "red"}
+	print(lang_info)
 	for lang in lang_info:	
 		plt.plot([lang_info[lang][0]], [lang_info[lang][1]], label=lang, marker='o', color=colorscheme[lang_info[lang][2]], markersize=5)
 	
@@ -70,6 +81,7 @@ if __name__ == "__main__":
 	x["mnd"] = (92, 0, 6)
 	x["geo"] = (167, 0, 6)
 	x["ain"] = (121, 0, 6)
+	print(x)
 	plot_cost_vs_complexity(x)
 	#print(aggregate_communicative_costs())
 
