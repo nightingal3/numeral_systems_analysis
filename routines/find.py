@@ -1,7 +1,7 @@
 import numpy as np
 from inspect import isfunction
 
-def find(iterable, cond):
+def find(iterable, cond, axis=0):
 	if isinstance(iterable, list) and callable(cond):
 		return [i for i, val in enumerate(iterable) if cond(val)]
 	elif isinstance(iterable, list) and not callable(cond):
@@ -13,9 +13,25 @@ def find(iterable, cond):
 			if callable(cond):
 				return [index for index, elem in np.ndenumerate(iterable) if cond(elem)]
 		 	else:
-				return [index for index, elem in np.ndenumerate(iterable) if elem == cond]
-		
-def find_diff(X, Y):
+				if isinstance(cond, np.ndarray):
+					if cond.ndim == 1:
+						res = []
+						for i in range(iterable.shape[axis]):
+							for j in range(iterable.shape[abs(axis - 1)]): #only supports 2d arrays for now
+								if axis == 0:
+									if iterable[i, j] == cond[i]:
+										res.append(j)
+										print(j)
+								else:
+									if iterable[j, i] == cond[i]:
+										res.append(j) 
+						return res
+					
+					elif cond.ndim == 0:
+						return 	[index for index, elem in np.ndenumerate(iterable) if elem == cond]
+					else:
+						raise NotImplementedError
+def find_diff(X, Y):	
 	#to match matlab implementation
 	return sorted(set(X) - set(Y))
 
