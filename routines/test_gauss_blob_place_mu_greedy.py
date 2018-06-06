@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from random import randint
 from compute_cost import compute_f_i_w_numerator
 from find import *
 
@@ -16,8 +17,24 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
 		mus = np.asarray(np.random.permutation(max(mus_init))[:nterm]).transpose()
 		cost_prev = compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange)	
 		for jj in range(nsamp):
-			(comp_perm, ccost_perm, mus) = update_position(nterm)
-			
+			seq = np.random.permutation(nterm)
+			flag = 1
+			for i in range(nsamp):
+				coin = randint(0, 1)
+				mus_propose = propose_mus(mus, max(mu_range), seq[i], coin)
+				ccost_perm_t, ccost_perm_ns_t, comp_perm_t, comp_perm_ns_t = compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange)
+				if optdir < 0:
+					flag = ccost_perm_t < costprev
+				else:
+					flag = ccost_perm_t > costprev
+	
+				if flag:
+					comp_perm = [comp_perm, comp_perm_t, comp_perm_ns_t]
+					ccost_perm = [ccost_perm, ccost_perm_t, ccost_perm_ns_t]
+					currdiff = abs(costprev - ccost_perm_t)
+					cost_prev = ccost_perm_t
+					mus = mus_propose
+						
 					 
 	
 	return comp_perm, ccost_perm
@@ -54,15 +71,6 @@ def compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange):
 	comp_perm_ns = 3 * length(find_unique(mmap))
 
 	return ccost_perm, ccost_perm_ns, comp_perm, com_perm_ns
-
-
-def update_position(nterm):
-	seq = np.random.permutation(nterm)
-	flag = 1
-
-	for i in range(nterm):
-		while flag == 1:
-			mus_proposed = propose_mus(mus, max(mu_range), seq[i], rand>0.5)		
 
 
 
