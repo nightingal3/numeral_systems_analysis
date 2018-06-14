@@ -3,6 +3,7 @@ from anytree.dotexport import RenderTreeGraph
 from anytree.exporter import DotExporter
 import os
 import inspect
+import pickle
 import langstrategy
 import sys
 reload(sys)
@@ -92,11 +93,15 @@ def make_tree(form, numexp, op):
     
 	return root
 
-def build_language(langcode, prnt=False):
+def build_language(langcode, stored_info=None, save=True, prnt=False):
 	#f = open(os.getcwd() + "/complexities/langlist.txt", "r+") 	
 	#langcodes = f.read().split('\r\n')
 	#f.close()
-
+        if stored_info:
+                with open(stored_info, "rb") as f:
+                        lang_info = pickle.load(f)
+                        if langcode in lang_info:
+                                return lang_info[langcode]
 	langcodes = [i[0] for i in inspect.getmembers(langstrategy, inspect.isfunction) if len(i[0]) == 3]
 
 	if langcode not in langcodes:
@@ -109,6 +114,13 @@ def build_language(langcode, prnt=False):
 	   print(calc_complexity_base(t))
 	if prnt:
 	    forest_disp(strat_res, langcode)
+	    
+	if save:
+               if stored_info:
+                       with open(stored_info, "rb") as f:
+                               lang_info = pickle.load(f)
+                        lang_info = {}
+                lang_info[langcode] = (complexity, num_type, ulim)
 	return complexity, num_type, ulim
 
 def calc_complexity_base(tree):
