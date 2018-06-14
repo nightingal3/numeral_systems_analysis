@@ -54,6 +54,7 @@ def collect_lang_data(filepath, dict_name="freq.p", mode=0, decades="all"):
 
 
 def plot_languages(langdict, mode=0, filename="benford_langs.png"):
+        plt.clf()
 	if mode == 0:
 		numberline = [i for i in range(10)]
 	elif mode == 1:
