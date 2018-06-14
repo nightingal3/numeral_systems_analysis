@@ -117,10 +117,11 @@ def build_language(langcode, stored_info=None, save=True, prnt=False):
 	    
 	if save:
                if stored_info:
-                       with open(stored_info, "rb") as f:
-                               lang_info = pickle.load(f)
                         lang_info = {}
-                lang_info[langcode] = (complexity, num_type, ulim)
+                        with open(stored_info, "rb") as f:
+                                lang_info = pickle.load(f)
+                        
+                        lang_info[langcode] = (complexity, num_type, ulim)
 	return complexity, num_type, ulim
 
 def calc_complexity_base(tree):

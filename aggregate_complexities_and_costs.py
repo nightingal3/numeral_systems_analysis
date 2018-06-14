@@ -122,8 +122,6 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 			modemap.extend([4] * (nnum - 3))
 			basen = 5
 			modemap[:-(ncats - 4)] = [n for n in range(basen, basen + (ncats - 5) + 1)]
-			print("I")
-			print(i)
 			compfe1new[i] = 3*3 + 4*(ncats - 3)
 		elif ncats == 4:
 			modemap = [1, 2, 3]
@@ -137,8 +135,6 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 			modemap = [1]
 			modemap.extend([2] * (nnum - 1))
 			compfe1new[i] = 3 + 4*(ncats - 1)
-		print(len(modemap))	
-		print(i)
 		costfe1new[i] = compute_cost.compute_cost_size_principle_arb(list(modemap), need_probs)
 
 	#recursive systems
