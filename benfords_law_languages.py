@@ -83,9 +83,9 @@ def plot_languages(langdict, mode=0, filename="benford_langs.png"):
 
 
 if __name__ == "__main__":
-	collect_lang_data("downloads/google_ngrams", dict_name="freq.p", mode=1, decade=[1800, 1850])
-        collect_lang_data("downloads/google_ngrams", dict_name="freq2.p", mode=1, decade=[1850, 1900])
-        collect_lang_data("downloads/google_ngrams", dict_name="freq3.p", mode=1, decade=[1900, 1950]) 
+	collect_lang_data("downloads/google_ngrams", dict_name="freq.p", mode=1, decades=[1800, 1850])
+        collect_lang_data("downloads/google_ngrams", dict_name="freq2.p", mode=1, decades=[1850, 1900])
+        collect_lang_data("downloads/google_ngrams", dict_name="freq3.p", mode=1, decades=[1900, 1950]) 
 	langdict = pickle.load(open("freq.p", "rb"))
 	ld2 = pickle.load(open("freq2.p", "rb"))
 	ld3 = pickle.load(open("freq3.p", "rb"))
