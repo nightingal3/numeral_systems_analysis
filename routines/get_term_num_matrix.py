@@ -18,8 +18,6 @@ def get_term_num_matrix(term, nnum, num_term_pt, end_category, numberline):
 	term_num_map = np.zeros((nterm, nnum))
 	for i in range(1, nterm + 1):
 		indices = find(num_term_pt, i)
-		print(indices)
-		print(len(num_term_pt))
 		for ind in indices:
 			term_num_map[i-1, ind] = 1
 		
