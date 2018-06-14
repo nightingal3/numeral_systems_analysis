@@ -3,10 +3,17 @@ matplotlib.use("Agg")
 import language_tree
 import langstrategy
 import inspect
-from routines import compute_cost_size_principle, compute_cost
+from routines import compute_cost, test_gauss_blob_place_mu_greedy
+from routines.compute_base_n_complexities import *
+from routines.find import *
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from scipy.spatial import ConvexHull
+from timeit import default_timer as timer
+from itertools import chain
+import pickle
+import os
 
 def aggregate_complexities():
 	info = {}
@@ -15,7 +22,7 @@ def aggregate_complexities():
 	langlist = [i[0] for i in inspect.getmembers(langstrategy, inspect.isfunction) if len(i[0]) == 3] 
 	
 	for i in range(len(langlist)):
-		complexity, num_type, ulim = language_tree.build_language(langlist[i])
+		complexity, num_type, ulim = language_tree.build_language(langlist[i], stored_info="language_data.p", save=True)
 		info[langlist[i]] = (complexity, num_type)
 
 	return info
@@ -37,43 +44,204 @@ def aggregate_communicative_costs(need_probs, lang_info):
 
 	#Restricted approximate systems
 	for lang in lang_by_category[0]:
-		print("lang")
-		print(lang)
-		print("mum_term_pt")
-		print(num_term_pt[lang])
-		print("end_category")
-		print(end_category[lang])
 		costs[lang] = compute_cost.compute_approx_cost(term[lang], numberline, num_term_pt[lang], end_category[lang], need_probs)
-		print(costs[lang])	
+			
 			
 	#Restricted exact systems	
 	for lang in lang_by_category[1]:
 		ulim[lang] = language_tree.build_language(lang)[2]
-		costs[lang] = compute_cost_size_principle(ulim[lang], need_probs)
+		costs[lang] = compute_cost.compute_cost_size_principle(ulim[lang], need_probs)
 
 	ret = {}
 	for lang in costs: #return as (complexity, cost, lang_type)
 		ret[lang] = (lang_info[lang][0], costs[lang], lang_info[lang][1])	
 	return ret
 
+
+def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=None, write=True):
+        if stored_data_dir:
+                try:
+                        comp_rand = pickle.load(open("stored_data_dir/comp_rand.p", "rb"))
+                        cost_rand = pickle.load(open("stored_data_dir/cost_rand.p", "rb"))
+                        compfe1new = pickle.load(open("stored_data_dir/compfe1new.p", "rb"))
+                        costfe1new = pickle.load(open("stored_data_dir/costfe1.new.p", "rb"))
+                        base_n_complexity = pickle.load(open("stored_data_dir/base_n_complexity.p", "rb"))
+
+                        try:
+                                close("stored_data_dir/comp_rand.p")
+                                close("stored_data_dir/cost_rand.p")
+                                close("stored_data_dir/compfe1new.p")
+                                close("stored_data_dir/costfe1new.p")
+                                close("stored_data_dir/base_n_complexity.p")
+                        except:
+                                print("Files could not be closed")
+
+                        return comp_rand, cost_rand, compfe1new, costfe1new, base_n_complexity
+                except:
+                        print("Please enter valid directory that hypothetical data was written to")
+                        return 
+                        
+	nitr = 100
+	numterms = [i for i in range(2, 56)]
+	numterms_2 = [i for i in range(2, 52)]
+	complexperm_rand = []
+        costperm_rand = []
+	comp_rand = []
+	cost_rand = []
+
+	#Approximate systems
+	for t in range(len(numterms)):
+		comp_lower_bound, cost_lower_bound = test_gauss_blob_place_mu_greedy(len(numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, -1)
+		comp_upper_bound, cost_upper_bound = test_gauss_blob_place_mu_greedy(len(numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, 1)
+		costperm_rand.extend([cost_lower_bound, cost_upper_bound])
+		complexperm_rand.extend([comp_lower_bound, comp_upper_bound])
 	
-		
-def plot_cost_vs_complexity(lang_info):
+	comp_rand, cost_rand = reconfig_comp_cost(complexperm_rand, costperm_rand)
+	
+        compfenew = [0] * len(numterms_2)
+	costfenew = [0] * len(numterms_2)	
+	#Exact restricted systems
+	for i in range(len(numterms_2)):
+		if i <= len(numterms_2):
+			tn = numterms_2[i] - 1
+		else:
+			tn = i
+		if tn <= 3:
+			compfenew[i] = tn* 3 + 4
+		else:
+			compfenew[i] = 3*3 + (tn - 3) * 4 + 4
+		costfenew[i] = compute_cost.compute_cost_size_principle(tn, need_probs)
+
+	compfe1new = [0] * len(numterms_2)
+	costfe1new = [0] * len(numterms_2)
+	nnum = len(numberline)
+	for i in range(len(numterms_2)):
+		ncats = numterms_2[i]
+		if ncats > 4:
+			modemap = [1, 2, 3]
+			modemap.extend([4] * (nnum - 3))
+			basen = 5
+			modemap[:-(ncats - 4)] = [n for n in range(basen, basen + (ncats - 5) + 1)]
+			print("I")
+			print(i)
+			compfe1new[i] = 3*3 + 4*(ncats - 3)
+		elif ncats == 4:
+			modemap = [1, 2, 3]
+			modemap.extend([4] * (nnum - 3))
+			compfe1new[i] = 3*3 + 4*(ncats - 3)
+		elif ncats == 3:
+			modemap = [1, 2]
+			modemap.extend([3] * (nnum - 2))
+			compfe1new[i] = 3*3 + 4*(ncats - 2)
+		elif ncats == 2:
+			modemap = [1]
+			modemap.extend([2] * (nnum - 1))
+			compfe1new[i] = 3 + 4*(ncats - 1)
+		print(len(modemap))	
+		print(i)
+		costfe1new[i] = compute_cost.compute_cost_size_principle_arb(list(modemap), need_probs)
+
+	#recursive systems
+	min_recursive, max_recursive = compute_base_n_complexities()
+	base_n_complexity = [min_recursive, max_recursive]
+	
+	#print(comp_lower_bound)
+	#print(cost_lower_bound)
+	#print(comp_upper_bound)
+	#print(cost_upper_bound)
+	#print(base_n_complexity)
+	if write:
+                if not os.path.isdir("hyp_lang_data"):
+                        os.path.mkdir("hyp_lang_data")
+                pickle.dump(cost_rand, open("hyp_lang_data/cost_rand.p", "wb"))
+                pickle.dump(comp_rand, open("hyp_lang_data/comp_rand.p", "wb"))
+                pickle.dump(compfe1new, open("hyp_lang_data/compfe1new.p", "wb"))
+                pickle.dump(costfe1new, open("hyp_lang_data/costfe1new.p", "wb"))
+                pickle.dump(base_n_complexity, open("hyp_lang_data/base_n_complexity.p", "wb"))
+	return comp_rand, cost_rand, compfe1new, costfe1new, base_n_complexity
+			
+def plot_cost_vs_complexity(lang_info, hyp_lang_info):
+	#attested languages
+
 	colorscheme = {1: "green", 6: "blue", 0: "red"}
-	print(lang_info)
-	for lang in lang_info:	
-		plt.plot([lang_info[lang][0]], [lang_info[lang][1]], label=lang, marker='o', color=colorscheme[lang_info[lang][2]], markersize=5)
-	
+	fig, ax = plt.subplots()
+	offsets = {"war": (3, 0.025), "prh": (5, 0.05), "goo": (5, 0.025), "ain": (0, 0.05), "geo": (0, 0.05)} #sadly must be done
+	seen = set()
+	for lang in lang_info:
+		x_offset = 5
+		y_offset = 0.05
+		if lang in offsets:
+			x_offset = offsets[lang][0]
+			y_offset = offsets[lang][1]
+		if (lang_info[lang][0], lang_info[lang][1]) not in seen:
+			ax.plot([lang_info[lang][0]], [lang_info[lang][1]], label=lang, marker='o', color=colorscheme[lang_info[lang][2]], markersize=5)
+			ax.annotate(lang, (lang_info[lang][0] + x_offset, lang_info[lang][1] + y_offset), size=7)
+			seen.add((lang_info[lang][0], lang_info[lang][1]))
 	plt.xlabel("Complexity")
 	plt.ylabel("Communicative cost")
+
+	#hypothetical languages
+	comp_rand, cost_rand, compfe1new, costfe1new, base_n_complexity = hyp_lang_info
+	comp_rand_expanded = []
+	for n in range(len(comp_rand)):
+		comp_rand_expanded.extend([comp_rand[n]] * len(cost_rand[n]))
+	cost_rand_expanded = list(chain.from_iterable(cost_rand[0]))
+	print("comp rand")
+	print(comp_rand_expanded)
+	print("cost_rand")
+	print(cost_rand_expanded)
+	print("costfe/compfe")
+	print(np.transpose(np.array((compfe1new, costfe1new))))
+	hull_exact = ConvexHull(np.transpose(np.array((compfe1new, costfe1new))))
+	#hull_approx = ConvexHull(np.transpose(np.array((comp_rand_expanded, cost_rand_expanded))))
+	for simplex in hull_exact.simplices:
+		plt.plot(compfe1new[simplex], costfe1new[simplex], color="#616263")
+	#for simplex in hull_approx.simplicies:
+		#plt.plot(comp_rand[simplex], cost_rand[simplex], color="#CDCFD3")
+	
+	plt.plot([0, 0], [base_n_complexity[0], base_n_complexity[1]])
+
 	plt.savefig("cvc.png", dpi=1000)
 	return	
 
-if __name__ == "__main__":
 
+def reconfig_comp_cost(comp_m, cost_m):
+	unique = find_unique(comp_m[0])
+	for i in range(1, len(comp_m)):
+		unique.extend(find_unique(comp_m[i]))
+	unique = find_unique(unique)
+	nc = len(unique)
+	cost = []
+	for i in range(nc):
+		cost.append([])
+		for j in range(len(cost_m)):
+			inds = find(comp_m[j], unique[i])
+			if len(inds) != 0:
+				cost[i].append([cost_m[j][ind] for ind in inds])
+
+		zinds = find(cost[i], float("inf"))
+		for zind in zinds:
+			cost[i][zind] = []
+
+	return unique, cost
+
+
+if __name__ == "__main__":
+        start = timer()
 	c = aggregate_complexities()
 	f = open("data/need_probs/needprobs_eng_fit.csv")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
+	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs)
+	#print("comp rand")
+	#print(y[0])
+	#print("cost rand")
+	#print(y[1])
+	#print("compfe1")
+	#print(y[2])
+	#print("costfe1")
+	#print(y[3])
+	end = timer()
+        print(end - start)
 	#print(need_probs)
 	#print(c)
 	x = aggregate_communicative_costs(need_probs, c)
@@ -81,8 +249,7 @@ if __name__ == "__main__":
 	x["mnd"] = (92, 0, 6)
 	x["geo"] = (167, 0, 6)
 	x["ain"] = (121, 0, 6)
-	print(x)
-	plot_cost_vs_complexity(x)
+	plot_cost_vs_complexity(x, y)
 	#print(aggregate_communicative_costs())
 
 	

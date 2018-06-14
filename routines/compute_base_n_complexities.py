@@ -28,7 +28,7 @@ def compute_base_n_complexities(plt=0):
 	if plt:
 		raise NotImplementedError
 	
-	return c
+	return min_c, max_c
 
 if __name__ == "__main__":
 	print(compute_base_n_complexities())	

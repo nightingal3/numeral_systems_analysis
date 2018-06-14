@@ -2,7 +2,6 @@ import numpy as np
 np.seterr(divide="ignore", invalid="ignore")
 import math
 import itertools
-from get_term_num_matrix import get_term_num_matrix
 from find import *
 
 def compute_P_w_i(nnum, ncat, numberline, mus, c, w):
@@ -134,7 +133,7 @@ if __name__ == "__main__":
 	#why is 8 missing:=?
 	f = open("../data/need_probs/needprobs_eng_fit.csv")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
-	term_num_map = get_term_num_matrix(["hoi1", "hoi2", "aibaagi"], 100, [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, [i for i in range(1, 101)])
-	#print(compute_f_i_w_numerator(100, 3, [i for i in range(1, 101)], np.asarray([18, 19, 20]).transpose(), 2.2810, 0.31))
-	print(compute_P_w_i_match_modemap([1, 2, 2, 2] + [3] * 96, [i for i in range(1, 101)], 3, term_num_map, [i for i in range(1, 21)], 2.2810, 0.31, need_probs))
+	#term_num_map = get_term_num_matrix(["hoi1", "hoi2", "aibaagi"], 100, [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, [i for i in range(1, 101)])
+	print(compute_f_i_w_numerator(100, 2, [i for i in range(1, 101)], np.asarray([18, 18]).transpose(), 2.2810, 0.31))
+	#print(compute_P_w_i_match_modemap([1, 2, 2, 2] + [3] * 96, [i for i in range(1, 101)], 3, term_num_map, [i for i in range(1, 21)], 2.2810, 0.31, need_probs))
 	#print(compute_P_w_i_correct_subitized(15, 8, [1, 2, 3, 4, 5, 6, 7, 8], 2.2810, 0.31, [1, 1, 1, 1, 0.9, 0.83, 0.75, 0.79, 0.72, 0.89, 0.89, 0.84, 0.84, 0.83, 0.78], [1, 2, 3], [0.0741029641185647, 0.0780031201248050, 0.0842433697347894, 0.0811232449297972, 0.0639625585023401, 0.333073322932917, 0.0257410296411857, 0.259750390015601]))	
