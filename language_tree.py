@@ -50,7 +50,6 @@ def make_tree(form, numexp, op):
 	    elif isinstance(form, list) and len(form) > 3:
 		#not sure how to represent this linguistically, just put all the components on the left
 		names = [i for i, f in enumerate(form)]
-		print(names)
 		for i in range(len(form)):
 		    names[i] = Node(form[i], parent=root)
 	    elif isinstance(form, list):
@@ -116,12 +115,12 @@ def build_language(langcode, stored_info=None, save=True, prnt=False):
 	    forest_disp(strat_res, langcode)
 	    
 	if save:
+               lang_info = {} 
                if stored_info:
-                        lang_info = {}
                         with open(stored_info, "rb") as f:
                                 lang_info = pickle.load(f)
-                        
-                        lang_info[langcode] = (complexity, num_type, ulim)
+
+               lang_info[langcode] = (complexity, num_type, ulim)
 	return complexity, num_type, ulim
 
 def calc_complexity_base(tree):

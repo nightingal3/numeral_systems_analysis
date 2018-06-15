@@ -53,8 +53,7 @@ def collect_lang_data(filepath, dict_name="freq.p", mode=0, decades="all"):
 	return freq
 
 
-def plot_languages(langdict, mode=0, filename="benford_langs.png"):
-        plt.clf()
+def plot_languages(langdict, mode=0, filename="benford_langs.png", title=None):
 	if mode == 0:
 		numberline = [i for i in range(10)]
 	elif mode == 1:
@@ -75,21 +74,25 @@ def plot_languages(langdict, mode=0, filename="benford_langs.png"):
 		plt.plot(numberline, n_info, label=lang)
 	plt.ylabel("Frequency")
 	plt.xlabel("Number line")
+	if title:
+                plt.title(title)
 	plt.legend()
 	if mode == 0: #show every tick if only showing first 10 numbers
 		plt.xticks(np.arange(numberline[0], numberline[-1] + 1, 1))
 	plt.savefig(filename)	
-	
+	plt.gcf().clear()
 	return 
 
 
 if __name__ == "__main__":
-	collect_lang_data("downloads/google_ngrams", dict_name="freq.p", mode=1, decades=[1800, 1850])
-        collect_lang_data("downloads/google_ngrams", dict_name="freq2.p", mode=1, decades=[1850, 1900])
-        collect_lang_data("downloads/google_ngrams", dict_name="freq3.p", mode=1, decades=[1900, 1950]) 
+	#collect_lang_data("downloads/google_ngrams", dict_name="freq4.p", mode=1, decades=[1950, 2000])
+        #collect_lang_data("downloads/google_ngrams", dict_name="freq2.p", mode=1, decades=[1850, 1900])
+        #collect_lang_data("downloads/google_ngrams", dict_name="freq3.p", mode=1, decades=[1900, 1950]) 
 	langdict = pickle.load(open("freq.p", "rb"))
 	ld2 = pickle.load(open("freq2.p", "rb"))
 	ld3 = pickle.load(open("freq3.p", "rb"))
-	plot_languages(langdict , mode=1, filename="1800to1850.png")		 
-	plot_languages(ld2, mode=1, filename="1850to1900.png")
-	plot_languages(ld3, mode=1, filename="1900to1950.png")	
+	ld4 = pickle.load(open("freq4.p", "rb"))
+	#plot_languages(langdict , mode=1, filename="1800to1850.png", title="1800 to 1850")		 
+	#plot_languages(ld2, mode=1, filename="1850to1900.png", title="1850 to 1900")
+	#plot_languages(ld3, mode=1, filename="1900to1950.png", title="1900 to 1950")
+        plot_languages(ld4, mode=1, filename="1950to2000.png", title="1950 to 2000")	
