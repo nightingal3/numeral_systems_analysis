@@ -383,7 +383,7 @@ def yid():
 
 def xoo():
     num_type = 1
-    ulim = None
+    ulim = 3
     forest = []
     terms = ["?ua(p)", "num(p)", "ae(p)"]
 
