@@ -21,7 +21,6 @@ def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_rang
 	
 	for j in range(nterm):
 		cat_inds = find(mmap, j+1)
-		print(cat_inds)
 		f = []
 		for ind in cat_inds:
 			f.append(F_i_w_numerator[j, ind])
@@ -39,22 +38,21 @@ def compute_cost_size_principle(upper_lim, need_prob):
 	unit_cost = [0] * length	
 	denom = length - (upper_lim + 1) + 1
 	for i in range(upper_lim, length):
-		unit_cost[i] = -math.log(float(1)/float(length - (upper_lim + 1) + 1), 2)
+		unit_cost[i] = -math.log(float(1)/float(denom), 2)
 	c0 = np.asarray(need_prob) * np.asarray(unit_cost) 
 
         return c0.sum()
 
 
 def compute_cost_size_principle_arb(modemap, need_prob):
-	l = len(nd)
-	unit_cost = [0] * 1
-	modemap_set = set(modemap)
+	l = len(need_prob)
+	unit_cost = [0] * l
+	modemap_set = list(set(modemap))
 	unique_cat = modemap_set
-	
 	for i in range(len(unique_cat)):
-		inds = [j for (j, val) in enumerate(modemap) if modemap[j] == unique_cat[i]] 
+		inds = [j for j, val in enumerate(modemap) if modemap[j] == unique_cat[i]]
 		for ind in inds:
-			unit_cost[ind] = -math.log(1/len(inds))
+			unit_cost[ind] = -math.log(float(1)/float(len(inds)), 2)
 
 	return sum(np.multiply(need_prob, unit_cost))
 			
@@ -63,3 +61,4 @@ if __name__ == "__main__":
 	f = open("../data/need_probs/needprobs_eng_fit.csv")
 	nd = [float(i) for i in f.read().split("\r\n")[:-1]]
 	print(compute_approx_cost(["hoi1", "hoi2", "aibaagi"], [i for i in range(1, 101)], [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, nd, [i for i in range(20)], 0.31))
+
