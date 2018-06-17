@@ -99,8 +99,6 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 	for t in range(len(numterms)):
 		comp_lower_bound, cost_lower_bound = test_gauss_blob_place_mu_greedy(len(numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, -1)
 		comp_upper_bound, cost_upper_bound = test_gauss_blob_place_mu_greedy(len(numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, 1)
-		print(comp_lower_bound)
-		print(cost_lower_bound)
 		cost_lower_bound.extend(cost_upper_bound)
 		comp_lower_bound.extend(comp_upper_bound)
 		costperm_rand.append(cost_lower_bound)
@@ -108,15 +106,6 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 	
 	
 	comp_rand, cost_rand = reconfig_comp_cost(complexperm_rand, costperm_rand)
-	print("comp rand")
-	print(comp_rand)
-	print("comp rand len")
-	print(len(comp_rand))
-	print("cost rand")
-	print(cost_rand)
-	print("cost rand len")
-	print(len(cost_rand))
-	assert False
 
         compfenew = [0] * len(numterms_2)
 	costfenew = [0] * len(numterms_2)	
@@ -161,11 +150,6 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 	min_recursive, max_recursive = compute_base_n_complexities()
 	base_n_complexity = [min_recursive, max_recursive]
 	
-	#print(comp_lower_bound)
-	#print(cost_lower_bound)
-	#print(comp_upper_bound)
-	#print(cost_upper_bound)
-	#print(base_n_complexity)
 	if write:
                 if not os.path.isdir("hyp_lang_data"):
                         os.mkdir("hyp_lang_data")
@@ -176,6 +160,8 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
                 pickle.dump(compfe1new, open("hyp_lang_data/compfe1new.p", "wb"))
                 pickle.dump(costfe1new, open("hyp_lang_data/costfe1new.p", "wb"))
                 pickle.dump(base_n_complexity, open("hyp_lang_data/base_n_complexity.p", "wb"))
+
+
 	return comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity
 			
 def plot_cost_vs_complexity(lang_info, hyp_lang_info):
@@ -211,20 +197,14 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
                         
 
 	assert len(comp_rand_new) == len(cost_rand_new)
-	#print("costfe/compfe")
-	#print(np.transpose(np.array((compfe1new, costfe1new))))
-	print(comp_rand_new)
-	print(cost_rand_new)
 	compfenew.extend(compfe1new)
 	costfenew.extend(costfe1new)
         exact_points = np.transpose(np.array((compfenew, costfenew)))
-	approx_points = np.array((comp_rand_new, cost_rand_new))
+	approx_points = np.transpose(np.array((comp_rand_new, cost_rand_new)))
+	
 
 	hull_exact = ConvexHull(exact_points)
 	hull_approx = ConvexHull(approx_points)
-
-	#plt.plot(exact_points[hull_exact.vertices, 0], exact_points[hull_exact.vertices, 1], color="#616263")
-	#plt.plot(exact_points[hull.vertices[0], 0], exact_points[hull.vertices[0], 1], color="#616263")
 	for simplex in hull_exact.simplices:
 		plt.plot(exact_points[simplex, 0], exact_points[simplex, 1], color="#CDCFD3")
 	for simplex in hull_approx.simplices:
@@ -265,25 +245,10 @@ def reconfig_comp_cost(comp_m, cost_m):
 
 
 def main():
-        start = timer()
 	c = aggregate_complexities()
 	f = open("data/need_probs/needprobs_eng_fit.csv")
-	timer_file = open("time.txt", "w")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
 	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs)
-	#print("comp rand")
-	#print(y[0])
-	#print("cost rand")
-	#print(y[1])
-	#print("compfe1")
-	#print(y[2])
-	#print("costfe1")
-	#print(y[3])
-	end = timer()
-        timer_file.write(str(end - start))
-	#print(need_probs)
-	#print(c)
-	#x = aggregate_communicative_costs(need_probs, c)
         f1 = open("attested.p", "rb")
         x = pickle.load(f1)
 	x["eng"] = (126, 0, 6)
@@ -291,7 +256,6 @@ def main():
 	x["geo"] = (167, 0, 6)
 	x["ain"] = (121, 0, 6)
 	plot_cost_vs_complexity(x, y)
-	#print(aggregate_communicative_costs())
 	f.close()
 	timer_file.close()
 
