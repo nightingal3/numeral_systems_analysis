@@ -65,10 +65,8 @@ def aggregate_communicative_costs(need_probs, lang_info):
 def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=None, write=True):
         if stored_data_dir:
                 try:
-                        comp_rand = []
-                        cost_rand = []
-                        #comp_rand = pickle.load(open(stored_data_dir + "/comp_rand.p", "rb"))
-                        #cost_rand = pickle.load(open(stored_data_dir + "/cost_rand.p", "rb"))
+                        comp_rand = pickle.load(open(stored_data_dir + "/comp_rand.p", "rb"))
+                        cost_rand = pickle.load(open(stored_data_dir + "/cost_rand.p", "rb"))
 			compfenew = pickle.load(open(stored_data_dir + "/compfenew.p", "rb"))
 			costfenew = pickle.load(open(stored_data_dir + "/costfenew.p", "rb"))
                         compfe1new = pickle.load(open(stored_data_dir + "/compfe1new.p", "rb"))
@@ -101,11 +99,25 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 	for t in range(len(numterms)):
 		comp_lower_bound, cost_lower_bound = test_gauss_blob_place_mu_greedy(len(numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, -1)
 		comp_upper_bound, cost_upper_bound = test_gauss_blob_place_mu_greedy(len(numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, 1)
-		costperm_rand.extend([cost_lower_bound, cost_upper_bound])
-		complexperm_rand.extend([comp_lower_bound, comp_upper_bound])
+		print(comp_lower_bound)
+		print(cost_lower_bound)
+		cost_lower_bound.extend(cost_upper_bound)
+		comp_lower_bound.extend(comp_upper_bound)
+		costperm_rand.append(cost_lower_bound)
+		complexperm_rand.append(comp_lower_bound)
+	
 	
 	comp_rand, cost_rand = reconfig_comp_cost(complexperm_rand, costperm_rand)
-	
+	print("comp rand")
+	print(comp_rand)
+	print("comp rand len")
+	print(len(comp_rand))
+	print("cost rand")
+	print(cost_rand)
+	print("cost rand len")
+	print(len(cost_rand))
+	assert False
+
         compfenew = [0] * len(numterms_2)
 	costfenew = [0] * len(numterms_2)	
 	#Exact restricted systems
@@ -188,32 +200,39 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
 
 	#hypothetical languages
 	comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity = hyp_lang_info
+	comp_rand_new = []
+	cost_rand_new = []
 	for n in range(len(comp_rand)):
-		comp_rand_expanded.extend([comp_rand[n]] * len(cost_rand[n]))
-	cost_rand_expanded = list(chain.from_iterable(cost_rand[0]))
-	#print("comp rand")
-	#print(comp_rand_expanded)
-	#print("cost_rand")
-	#print(cost_rand_expanded)
+		minv = min(cost_rand[n])
+		maxv = max(cost_rand[n])
+		if minv is not None and maxv is not None:
+			comp_rand_new.extend([comp_rand[n], comp_rand[n]])
+			cost_rand_new.extend([minv, maxv])
+                        
+
+	assert len(comp_rand_new) == len(cost_rand_new)
 	#print("costfe/compfe")
 	#print(np.transpose(np.array((compfe1new, costfe1new))))
+	print(comp_rand_new)
+	print(cost_rand_new)
 	compfenew.extend(compfe1new)
 	costfenew.extend(costfe1new)
         exact_points = np.transpose(np.array((compfenew, costfenew)))
-	approx_points = np.transpose(np.array((comp_rand_expanded, cost_rand_expanded)))
+	approx_points = np.array((comp_rand_new, cost_rand_new))
 
 	hull_exact = ConvexHull(exact_points)
-	hull_approx = ConvexHull(np.transpose(np.array((comp_rand_expanded, cost_rand_expanded))))
-	print("hull")
-	print(hull_exact.simplices)
+	hull_approx = ConvexHull(approx_points)
+
 	#plt.plot(exact_points[hull_exact.vertices, 0], exact_points[hull_exact.vertices, 1], color="#616263")
 	#plt.plot(exact_points[hull.vertices[0], 0], exact_points[hull.vertices[0], 1], color="#616263")
 	for simplex in hull_exact.simplices:
 		plt.plot(exact_points[simplex, 0], exact_points[simplex, 1], color="#CDCFD3")
 	for simplex in hull_approx.simplices:
 		plt.plot(approx_points[simplex, 0], approx_points[simplex, 1], color="#676768")
+	plt.fill(exact_points[hull_exact.vertices, 0], exact_points[hull_exact.vertices, 1], alpha=0.3, color="#CDCFD3")
 	plt.scatter(compfenew, costfenew, color="#CDCFD3", s=2)
-	plt.scatter(comp_rand_expanded, cost_rand_expanded, color="#676768", s=2)
+	plt.fill(approx_points[hull_approx.vertices, 0], approx_points[hull_approx.vertices, 1], alpha=0.3, color="#676768")
+	plt.scatter(comp_rand_new, cost_rand_new, color="#676768", s=2)
 	
 	plt.plot([base_n_complexity[0], base_n_complexity[1]], [0, 0])
 	plt.xlim(xmax=200)
@@ -226,7 +245,8 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
 def reconfig_comp_cost(comp_m, cost_m):
 	unique = find_unique(comp_m[0])
 	for i in range(1, len(comp_m)):
-		unique.extend(find_unique(comp_m[i]))
+                unique.extend(comp_m[i])
+                
 	unique = find_unique(unique)
 	nc = len(unique)
 	cost = []
@@ -235,11 +255,11 @@ def reconfig_comp_cost(comp_m, cost_m):
 		for j in range(len(cost_m)):
 			inds = find(comp_m[j], unique[i])
 			if len(inds) != 0:
-				cost[i].append([cost_m[j][ind] for ind in inds])
+                                for ind in inds:
+                                        cost[i].append(cost_m[j][ind])
 
 		zinds = find(cost[i], float("inf"))
-		for zind in zinds:
-			cost[i][zind] = []
+		cost[i] = [val for index, val in enumerate(cost[i]) if index not in zinds]
 
 	return unique, cost
 
@@ -250,7 +270,7 @@ def main():
 	f = open("data/need_probs/needprobs_eng_fit.csv")
 	timer_file = open("time.txt", "w")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
-	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs, stored_data_dir="hyp_lang_data")
+	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs)
 	#print("comp rand")
 	#print(y[0])
 	#print("cost rand")
