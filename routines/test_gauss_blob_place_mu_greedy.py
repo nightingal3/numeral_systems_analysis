@@ -2,7 +2,6 @@ import numpy as np
 import math
 from random import randint
 from compute_cost import compute_f_i_w_numerator
-import pyximport; pyximport.install()
 from find import *
 
 def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, need_probs, nsamp, optdir, subrange=[i for i in range(3)]):
@@ -33,7 +32,9 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
 					if flag:
 					
 						comp_perm.extend([comp_perm_t, comp_perm_ns_t])
+						#comp_perm.extend(comp_perm_ns_t)
 						ccost_perm.extend([ccost_perm_t, ccost_perm_ns_t])
+						#ccost_perm.extend(ccost_perm_ns_t)
 						curr_diff = abs(cost_prev - ccost_perm_t)
 						cost_prev = ccost_perm_t
 						mus = mus_propose
