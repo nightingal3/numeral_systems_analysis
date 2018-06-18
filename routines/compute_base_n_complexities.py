@@ -1,6 +1,9 @@
+import matplotlib
+matplotlib.use("Agg")
 import math
+import matplotlib.pyplot as plt
 
-def compute_base_n_complexities(plt=0):
+def compute_base_n_complexities(plot=0):
 	# 2 - 11
 	c = [397, 208, 127, 98, 104, 116, 106, 113, 92, 94]
 
@@ -26,9 +29,12 @@ def compute_base_n_complexities(plt=0):
 	max_c = max(c)
 	
 	if plt:
-		raise NotImplementedError
+		plt.plot([i for i in range(2, 101)], c)
+		plt.xlabel("Base")
+		plt.ylabel("Complexity")
+		plt.savefig("base_complexities.png")		
 	
 	return min_c, max_c
 
 if __name__ == "__main__":
-	print(compute_base_n_complexities())	
+	print(compute_base_n_complexities(plot=1))	

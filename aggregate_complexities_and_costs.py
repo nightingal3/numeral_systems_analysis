@@ -210,13 +210,13 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
 	for simplex in hull_approx.simplices:
 		plt.plot(approx_points[simplex, 0], approx_points[simplex, 1], color="#676768")
 	plt.fill(exact_points[hull_exact.vertices, 0], exact_points[hull_exact.vertices, 1], alpha=0.3, color="#CDCFD3")
-	plt.scatter(compfenew, costfenew, color="#CDCFD3", s=2)
+	#plt.scatter(compfenew, costfenew, color="#CDCFD3", s=2)
 	plt.fill(approx_points[hull_approx.vertices, 0], approx_points[hull_approx.vertices, 1], alpha=0.3, color="#676768")
-	plt.scatter(comp_rand_new, cost_rand_new, color="#676768", s=2)
+	#plt.scatter(comp_rand_new, cost_rand_new, color="#676768", s=2)
 	
 	plt.plot([base_n_complexity[0], base_n_complexity[1]], [0, 0])
 	plt.xlim(xmax=200)
-
+	plt.ylim(ymax=4)
 	plt.savefig("cvc.png", dpi=1000)
 	plt.gcf().clear()
 	return	
@@ -248,7 +248,7 @@ def main():
 	c = aggregate_complexities()
 	f = open("data/need_probs/needprobs_eng_fit.csv")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
-	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs)
+	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs, stored_data_dir="hyp_lang_data")
         f1 = open("attested.p", "rb")
         x = pickle.load(f1)
 	x["eng"] = (126, 0, 6)
@@ -257,7 +257,7 @@ def main():
 	x["ain"] = (121, 0, 6)
 	plot_cost_vs_complexity(x, y)
 	f.close()
-	timer_file.close()
+	
 
 
 if __name__ == "__main__":
