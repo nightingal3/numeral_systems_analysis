@@ -10,7 +10,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-def make_tree(form, numexp, op):
+def make_tree(form, numexp, op, numeral_only=False):
 	"""Makes a tree for the given expression, where the left subtree represents the form and the right subtree represents the expression."""
 	root = Node("=")
 	
@@ -25,38 +25,43 @@ def make_tree(form, numexp, op):
 	elif op == "ONE" or op == "EQU":
 	    if op == "EQV":
 		root = Node(u'\u2263')
-	    l = Node(form, parent=root)
+	    if not numeral_only:
+	        l = Node(form, parent=root)
 	    r = Node(numexp, parent=root)
 	    
 	elif op == "GAU":
-		l = Node(form, parent=root)
+                if not numeral_only:
+		    l = Node(form, parent=root)
 		r_root = Node("g" + str(numexp), parent=root)
 
 	elif op == "SUC":
-		l = Node(form, parent=root)
+                if not numeral_only:
+		    l = Node(form, parent=root)
 		r_root = Node("s", parent=root)
 		r_exp = Node(numexp - 1, parent=r_root)
 			
-	elif op == "HIG":			  	
-	    l = Node(form, parent=root)
+	elif op == "HIG":
+            if not numeral_only:
+	        l = Node(form, parent=root)
 	    r = Node(">", parent=root)	
 	    r_c = Node(str(numexp[0]), parent=r)
 	
 	elif op in ["ADD", "SUB", "MUL", "DIV", "POW"]:
-	    if isinstance(form, list) and len(form) == 3:
+	    if (isinstance(form, list) and len(form) == 3) and not numeral_only:
 	        l_root = Node(form[1], parent=root)
 		l_l = Node(form[0], parent=l_root)
 		l_r = Node(form[2], parent=l_root)
-	    elif isinstance(form, list) and len(form) > 3:
+	    elif (isinstance(form, list) and len(form) > 3) and not numeral_only:
 		#not sure how to represent this linguistically, just put all the components on the left
 		names = [i for i, f in enumerate(form)]
 		for i in range(len(form)):
 		    names[i] = Node(form[i], parent=root)
-	    elif isinstance(form, list):
+	    elif isinstance(form, list) and not numeral_only:
 		l_root = Node(form[0], parent=root)
 		l_c = Node(form[1], parent=l_root)
-	    else:
+	    elif not numeral_only:
 		l_root = Node(form, parent=root)
+
 	    if op == "ADD":
                 r_root = Node("+", parent=root)
 	    elif op == "SUB":
@@ -67,28 +72,31 @@ def make_tree(form, numexp, op):
 		r_root = Node(u'\u00f7', parent=root)
 	    elif op == "POW":
 		r_root = Node(u'\u2191', parent=root)
-            r_l_root = Node("m", parent=r_root)
-            r_r_root = Node("m", parent=r_root)
-            r_l_c = Node(numexp[0], parent=r_l_root)
-            r_r_c = Node(numexp[1], parent=r_r_root)
+	    if not numeral_only:
+                r_l_root = Node("m", parent=r_root)
+                r_r_root = Node("m", parent=r_root)
+                r_l_c = Node(numexp[0], parent=r_l_root)
+                r_r_c = Node(numexp[1], parent=r_r_root)
         	
 
 	elif op == "MTA" or op == "MTS":
-	    l_root = Node(form[2], parent=root)
-            l_l_0 = Node(form[0], parent=l_root)
-            l_l_1 = Node(form[1], parent=l_l_0)
-            l_r = Node(form[3], parent=l_root)
+            if not numeral_only:
+	        l_root = Node(form[2], parent=root)
+                l_l_0 = Node(form[0], parent=l_root)
+                l_l_1 = Node(form[1], parent=l_l_0)
+                l_r = Node(form[3], parent=l_root)
 	    if op == "MTA":
                 r_root = Node("+", parent=root)
 	    else:
 		r_root = Node("-", parent=root)
-            r_l_r = Node(u'\u2715'.encode("utf-8"), parent=r_root)
-            r_l_l = Node("m", parent=r_l_r)
-            r_l_l_1 = Node(numexp[0], parent=r_l_l)
-            r_l_r = Node("m", parent=r_l_r)
-            r_l_r_1 = Node(numexp[1], parent=r_l_r)
-            r_r = Node("m", parent=r_root)
-            r_r_1 = Node(numexp[2], parent=r_r)        
+	    if not numeral_only:
+                r_l_r = Node(u'\u2715'.encode("utf-8"), parent=r_root)
+                r_l_l = Node("m", parent=r_l_r)
+                r_l_l_1 = Node(numexp[0], parent=r_l_l)
+                r_l_r = Node("m", parent=r_l_r)
+                r_l_r_1 = Node(numexp[1], parent=r_l_r)
+                r_r = Node("m", parent=r_root)
+                r_r_1 = Node(numexp[2], parent=r_r)        
     
 	return root
 
