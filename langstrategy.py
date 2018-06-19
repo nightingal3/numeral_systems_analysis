@@ -1,4 +1,6 @@
 import language_tree
+import pickle
+import os
 """
 	num_type meaning:
 	0: restricted approximate
@@ -11,25 +13,32 @@ import language_tree
 """
 #might use for cleaniness, might not
 class Language:
-	def __init__(self, num_type, ulim):
+	def __init__(self, num_type, ulim, num_only=False):
 		self.num_type = num_type
 		self.ulim = ulim
 		self.forest = []
+                self.num_only = num_only
 
-	def get_num_type():
-		return num_type
+	def get_num_type(self):
+		return self.num_type
 	
-	def get_ulim():
-		return ulim
+	def get_ulim(self):
+		return self.ulim
 
-	def get_forest():
-		return forest
+	def get_forest(self):
+		return self.forest
 
-	def add_tree(tree):
-		forest.append(tree)
-	
-	
+	def add_rule(self, form, numeral, op):
+		self.forest.append(language_tree.make_tree(form, numeral, op, self.num_only))
+                              
+        def first_three(self, terms):
+                for c in range(3):
+                        self.forest.append(language_tree.make_tree(terms[c], c+1, "ONE", self.num_only))
 
+        def successors(self, terms, start, end):
+                for c in range(start, end):
+                        self.forest.append(language_tree.make_tree(terms[c], c+1, "SUC", self.num_only))
+            
 def acg():
     num_type = 1
     ulim = 3
@@ -327,6 +336,7 @@ def ram():
 
     return forest, num_type, ulim
 
+
 def war():
     num_type = 0
     ulim = None
@@ -397,9 +407,9 @@ def xoo():
 
 # helper functions for common language aspects
 
-def first_three(forest, terms):
+def first_three(forest, terms, num_only):
     for c in range(3):
-        forest.append(language_tree.make_tree(terms[c], c+1, "ONE"))
+        forest.append(language_tree.make_tree(terms[c], c+1, "ONE", num_only))
          
     return forest
 
@@ -410,5 +420,21 @@ def successors(forest, terms, start, end):
 	return forest
 
 if __name__ == "__main__":
-    f = mrt()
-    forest_disp(f, "mrt")			 
+    #all_langs = dir(langstrategy)
+    #f = mrt()
+    #forest_disp(f, "mrt")
+                                  
+    #Old Irish
+    sga = Language(6, None, num_only=True)
+    sga.first_three([1, 2, 3]) 
+    for i in range(4, 10):
+        sga.add_rule(None, i, "SUC")
+    sga.add_rule(None, ["u", "ten"], "ADD")
+    sga.add_rule(None,  ["u", "twenty", "v"], "MTA")
+    sga.add_rule(None, ["u", "base"], "MUL")
+    sga.add_rule(None, ["u", "ten", "v"], "MTA")
+    sga.add_rule(None, ["ten", "two"], "POW")
+    if not os.path.exists("language_objects"):
+	os.makedirs("language_objects")
+    pickle.dump(sga, open("language_objects/sga.p", "w"))
+    #mem?

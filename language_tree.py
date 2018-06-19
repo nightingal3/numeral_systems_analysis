@@ -72,11 +72,11 @@ def make_tree(form, numexp, op, numeral_only=False):
 		r_root = Node(u'\u00f7', parent=root)
 	    elif op == "POW":
 		r_root = Node(u'\u2191', parent=root)
-	    if not numeral_only:
-                r_l_root = Node("m", parent=r_root)
-                r_r_root = Node("m", parent=r_root)
-                r_l_c = Node(numexp[0], parent=r_l_root)
-                r_r_c = Node(numexp[1], parent=r_r_root)
+	    
+            r_l_root = Node("m", parent=r_root)
+            r_r_root = Node("m", parent=r_root)
+            r_l_c = Node(numexp[0], parent=r_l_root)
+            r_r_c = Node(numexp[1], parent=r_r_root)
         	
 
 	elif op == "MTA" or op == "MTS":
