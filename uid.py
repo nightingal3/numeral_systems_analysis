@@ -28,10 +28,10 @@ def read_file(filename):
 def calc_entropy_trajectory(df, need_prob, *opts):
 	eng_dict = {"one": 1, "two": 2, "three": 3, "thir": 3, "four": 4, "five": 5, "fif": 5, "six": 6, "seven": 7, "eight": 8, "eigh": 8, "nine": 9, "teen": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "twenty": 20, "thirty": 30, "fourty": 40}	
 	eng_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
-	eng_dict.update({"thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
+	eng_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
 	inv_eng_dict = {val: key for key, val in eng_dict.items()}
 	entropies = [val * math.log(1/float(val), 2) for val in need_prob] 
-	base_H = sum(entropies)
+	#base_H = sum(entropies)
 	H_traj_dict = {}
 
 	for opt in opts:
@@ -39,11 +39,18 @@ def calc_entropy_trajectory(df, need_prob, *opts):
 			curr_num = number[i]
 			phrase = opt[i]
 			selected_vals = []
-			H_seq = []
+			base_H = need_prob[curr_num]
+			H_seq = [base_H]
 			for j in range(len(phrase)):
 				curr = ''
 				if j > 0:
-					curr = phrase[j - 1] + '-' + phrase[j]
+					if phrase[j] == "ty":
+						curr = phrase[j - 1] + phrase[j]
+
+					elif phrase[j - 1] == "ty":
+                                                curr = phrase[j - 2] + phrase[j - 1] + "-" + phrase[j]
+					else:
+						curr = phrase[j - 1] + '-' + phrase[j]
 					print(curr)
 					#print(selected_vals)
 					
@@ -54,9 +61,9 @@ def calc_entropy_trajectory(df, need_prob, *opts):
 					print(curr)
 					selected_vals = [i for i in range(1, 101)]
 
-				H, selected_vals = calc_conditional_entropy(curr, need_prob, eng_dict, inv_eng_dict, selected_vals)
+				H, selected_vals = calc_conditional_probability(curr, curr_num, need_prob, eng_dict, inv_eng_dict, selected_vals)
 				H_seq.append(H)
-			H_seq.insert(0, base_H)
+
                         H_traj_dict[curr_num] = H_seq
 
         UID_dev = {}
@@ -65,28 +72,40 @@ def calc_entropy_trajectory(df, need_prob, *opts):
 
 	return H_traj_dict, UID_dev
 
-def calc_conditional_entropy(word, need_prob, num_dict, inv_num_dict, numberline):
+def calc_conditional_probability(word, target, need_prob, num_dict, inv_num_dict, numberline):
 	word_val = num_dict[word]
 	selected_vals = []
+	irregulars = ["twen", "thir", "fif", "eigh"]
 	for num in numberline:
-		if word_val == num or (len(str(num)) > 1 and word == inv_num_dict[num][:len(word)]):
+		if (word_val == num and word not in irregulars) or (len(str(num)) > 1 and word == inv_num_dict[num][:len(word)]):
 			selected_vals.append(num)
-        need_prob = [val for i, val in enumerate(need_prob) if i in selected_vals]
-	denom = 0
+	need_prob = [val for i, val in enumerate(need_prob) if i + 1 in selected_vals]
+	if sum(need_prob) == 0:
+		print("Error: word '%s' does not refer to any number. Ensure all input words are correct." % word)
+		sys.exit(1);
+	print(target)
+	print(selected_vals)
+	print(need_prob)
+	P_target = need_prob[find(selected_vals, target)[0]]
+	P_all = sum(need_prob)
+
+	return float(P_target) / float(P_all), selected_vals
 	
-	for i in range(len(numberline)):
-		if numberline[i] in selected_vals:
-                        print("numberline[i]: %s" % numberline[i])
-                        print("selected_vals: %s" % selected_vals)
-                        print("i: %d, need_prob: %s" % (i, need_prob))
-                        print("position: %s" % find(selected_vals, numberline[i])[0])
-                        #denom += need_prob[i]
-			denom += need_prob[find(selected_vals, numberline[i])[0]]
-	if denom == 0:
+def calc_conditional_entropy(word, need_prob, num_dict, inv_num_dict, numberline):
+	"""Depreciated"""
+	word_val = num_dict[word]
+	selected_vals = []
+	irregulars = ["twen", "thir", "fif", "eigh"]
+	for num in numberline:
+		if (word_val == num and word not in irregulars) or (len(str(num)) > 1 and word == inv_num_dict[num][:len(word)]):
+			selected_vals.append(num)
+        need_prob = [val for i, val in enumerate(need_prob) if i + 1 in selected_vals]
+	
+	if sum(need_prob) == 0:
 		print("Error: word '%s' does not refer to any number. Ensure all input words are correct." % word)
 		sys.exit(1);
         print(selected_vals)
-	entropies = [(need_prob[i]/denom) * math.log(1/float(need_prob[i]/denom), 2) for i, val in enumerate(selected_vals)]
+	entropies = [(need_prob[i]/sum(need_prob)) * math.log(1/float(need_prob[i]/sum(need_prob)), 2) for i, val in enumerate(selected_vals)]
 
 	return sum(entropies), selected_vals
 
@@ -127,6 +146,8 @@ if __name__ == "__main__":
 	print(H_trajs, UID_dev)
 	lists = sorted(UID_dev.items())
 	x, y = zip(*lists)
+	#fifteen = H_trajs[25]
+	#print(fifteen)
 	plt.plot(x, y)
 	plt.xlabel("Number")
 	plt.ylabel("UID deviation score")
