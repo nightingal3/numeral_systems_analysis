@@ -25,16 +25,27 @@ def read_file(filename):
 	return number, eng_words, eng_mod
 
 
-def calc_entropy_trajectory(df, need_prob, *opts):
-	eng_dict = {"one": 1, "two": 2, "three": 3, "thir": 3, "four": 4, "five": 5, "fif": 5, "six": 6, "seven": 7, "eight": 8, "eigh": 8, "nine": 9, "teen": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "twenty": 20, "thirty": 30, "fourty": 40}	
+def calc_entropy_trajectory(df, need_prob, **opts):	
 	eng_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
 	eng_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
 	inv_eng_dict = {val: key for key, val in eng_dict.items()}
+	alt_eng_dict = {"-".join(key.split("-")[::-1]): val for key, val in eng_dict.items()}
+	del alt_eng_dict["teen-eigh"]
+	alt_eng_dict["teen-eight"] = 18
+	inv_alt_eng_dict = {val: key for key, val in alt_eng_dict.items()}
 	entropies = [val * math.log(1/float(val), 2) for val in need_prob] 
-	#base_H = sum(entropies)
 	H_traj_dict = {}
 
-	for opt in opts:
+	for name, opt in opts.items():
+		if name == "eng":
+			curr_dict = eng_dict
+			inv_dict = inv_eng_dict
+		elif name == "eng_alt":
+			curr_dict = alt_eng_dict
+			inv_dict = inv_alt_eng_dict
+
+		H_traj_dict[name] = {}
+
 		for i in range(len(number)):
 			curr_num = number[i]
 			phrase = opt[i]
@@ -51,31 +62,29 @@ def calc_entropy_trajectory(df, need_prob, *opts):
                                                 curr = phrase[j - 2] + phrase[j - 1] + "-" + phrase[j]
 					else:
 						curr = phrase[j - 1] + '-' + phrase[j]
-					print(curr)
-					#print(selected_vals)
-					
-					#need_prob = [val for i, val in enumerate(need_prob) if i in selected_vals]
 				
 				else:
 					curr = phrase[j]
-					print(curr)
 					selected_vals = [i for i in range(1, 101)]
 
-				H, selected_vals = calc_conditional_probability(curr, curr_num, need_prob, eng_dict, inv_eng_dict, selected_vals)
+				H, selected_vals = calc_conditional_probability_reconst_cost(curr, curr_num, need_prob, curr_dict, inv_dict, selected_vals)
 				H_seq.append(H)
 
-                        H_traj_dict[curr_num] = H_seq
+                        H_traj_dict[name][curr_num] = H_seq
 
         UID_dev = {}
-        for traj in H_traj_dict:
-                UID_dev[traj] = calc_UID_deviation(H_traj_dict[traj], len(inv_eng_dict[traj].split("-")))
+	for name, opt in opts.items():
+		UID_dev[name] = {}		
+        for opt in H_traj_dict:
+		for traj in H_traj_dict[opt]:
+                	UID_dev[opt][traj] = calc_UID_deviation(H_traj_dict[opt][traj], len(inv_eng_dict[traj].split("-")))
 
 	return H_traj_dict, UID_dev
 
-def calc_conditional_probability(word, target, need_prob, num_dict, inv_num_dict, numberline):
+def calc_conditional_probability_reconst_cost(word, target, need_prob, num_dict, inv_num_dict, numberline):
 	word_val = num_dict[word]
 	selected_vals = []
-	irregulars = ["twen", "thir", "fif", "eigh"]
+	irregulars = ["twen", "thir", "fif"]
 	for num in numberline:
 		if (word_val == num and word not in irregulars) or (len(str(num)) > 1 and word == inv_num_dict[num][:len(word)]):
 			selected_vals.append(num)
@@ -83,9 +92,6 @@ def calc_conditional_probability(word, target, need_prob, num_dict, inv_num_dict
 	if sum(need_prob) == 0:
 		print("Error: word '%s' does not refer to any number. Ensure all input words are correct." % word)
 		sys.exit(1);
-	print(target)
-	print(selected_vals)
-	print(need_prob)
 	P_target = need_prob[find(selected_vals, target)[0]]
 	P_all = sum(need_prob)
 
@@ -104,7 +110,6 @@ def calc_conditional_entropy(word, need_prob, num_dict, inv_num_dict, numberline
 	if sum(need_prob) == 0:
 		print("Error: word '%s' does not refer to any number. Ensure all input words are correct." % word)
 		sys.exit(1);
-        print(selected_vals)
 	entropies = [(need_prob[i]/sum(need_prob)) * math.log(1/float(need_prob[i]/sum(need_prob)), 2) for i, val in enumerate(selected_vals)]
 
 	return sum(entropies), selected_vals
@@ -119,10 +124,9 @@ def calc_UID_deviation(H_traj, phrase_len):
 		if i == phrase_len - 1:
 			I = H_traj[-2]
 		else:
-			I = H_traj[i] - H_traj[i + 1]
-		print(I)
-		total += abs(float(I)/float(H_traj[0]) - (1/float(phrase_len)))
-
+			I = H_traj[i + 1] - H_traj[i]
+		
+		total += abs(float(I) - (1/float(phrase_len)))
 	return (float(phrase_len)/float(phrase_len + 1)) * total
 
 
@@ -141,15 +145,19 @@ if __name__ == "__main__":
 	number_words = f_num["Reading"].values.tolist()
 	df = pd.read_csv("data/terms_1_to_100/english.csv")
 	need_probs = [float(i) for i in f_np.read().split("\r\n")[:-1]]
-	print("H_traj")
-	H_trajs, UID_dev = calc_entropy_trajectory(df, need_probs, eng_words)
-	print(H_trajs, UID_dev)
-	lists = sorted(UID_dev.items())
+	H_trajs, UID_dev = calc_entropy_trajectory(df, need_probs, eng=eng_words, eng_alt=eng_mod)
+	eng_reg = UID_dev["eng"]
+	eng_alt = UID_dev["eng_alt"]
+	lists = sorted(eng_reg.items())
+	lists = [item for item in lists if item[0] % 10 != 0]
+	lists1 = sorted(eng_alt.items())
+	lists1 = [item for item in lists1 if item[0] % 10 != 0]
 	x, y = zip(*lists)
-	#fifteen = H_trajs[25]
-	#print(fifteen)
-	plt.plot(x, y)
+	x1, y1 = zip(*lists1)
+	plt.plot(x, y, color="blue", label="English attested")
+	plt.plot(x1, y1, color="orange", label="English alternate")
 	plt.xlabel("Number")
 	plt.ylabel("UID deviation score")
+	plt.legend()
 	plt.savefig("UID_dev.png")
-	
+	plt.gcf().clear()
