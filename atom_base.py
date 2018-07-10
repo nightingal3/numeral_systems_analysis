@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import scipy
 import numpy as np
 import matplotlib.ticker as ticker
+import pandas as pd
+
 
 def err_over_time(filename):
 	eng_dictionary = {"one": 1, "two": 2, "three": 3, "thir": 3, "four": 4, "five": 5, "fif": 5, "six": 6, "seven": 7, "eight": 8, "eigh": 8, "nine": 9, "teen": 10, "eleven": 11, "twelve": 12, "twenty": 20, "thirty": 30}
@@ -70,7 +72,7 @@ def err_over_time(filename):
 	
 		#eng_points.extend([(number, abs(number - seq_eng_0[i]) for i in len(seq_eng_0))])
 		#eng_mod_points.extend([number, abs(number - seq_eng_1[i]) for i in len(seq_eng_1)])
-		
+	f.close()	
 	return number, res0, res1
 
 def plot_err_comparison(number_list, opt1, opt2):
@@ -162,7 +164,21 @@ def plot_diff_seq(numbers, opt1, opt2):
 	plt.gcf().clear()		
 
 def find_err(target_num, guess):
-	return abs(target_num - guess)	
+	return abs(target_num - guess)
+
+
+def contingency_stats(filename):
+	table = pd.read_csv(filename)
+	teens_base_atom = 0
+	teens_atom_base = 0
+	twenty_base_atom = 0
+	twenty_atom_base = 0
+	
+	teens = table.iloc[:, 13]
+	twenties = table.iloc[:, 47]
+	
+	
+				
 
 if __name__ == "__main__":
 	#print(find_diff([(0, 21), (6, 1), (9, 0)], [(0, 21), (3, 20), (9, 0)]))
