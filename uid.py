@@ -6,6 +6,8 @@ import sys
 from routines.find import *
 import matplotlib.pyplot as plt
 import itertools
+import pickle
+import csv
 
 def read_file(filename, num_opts):
 	f = open(filename, "r");
@@ -30,19 +32,28 @@ def read_file(filename, num_opts):
 
 
 def calc_info_trajectory(df, need_prob, **opts):	
-	eng_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
-	eng_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
-	inv_eng_dict = {val: key for key, val in eng_dict.items()}
-	alt_eng_dict = {"-".join(key.split("-")[::-1]): val for key, val in eng_dict.items()}
-	del alt_eng_dict["teen-eigh"]
-	alt_eng_dict["teen-eight"] = 18
-	inv_alt_eng_dict = {val: key for key, val in alt_eng_dict.items()}
+	curr_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
+	#curr_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
+	inv_dict = {val: key for key, val in curr_dict.items()}
+	alt_dict = {"-".join(key.split("-")[::-1]): val for key, val in curr_dict.items()}
+	#del alt_eng_dict["teen-eigh"]
+	#alt_eng_dict["teen-eight"] = 18
+	inv_alt_dict = {val: key for key, val in alt_dict.items()}
 	entropies = [val * math.log(1/float(val), 2) for val in need_prob] 
 	H_traj_dict = {}
 
 	for name, opt in opts.items():
-                skip_range = None
-		if name == "eng":
+                if name[-3:] == "alt":
+                        curr_tmp = curr_dict
+			curr_dict = alt_dict
+			inv_tmp = inv_dict
+			inv_dict = inv_alt_dict
+
+		else:
+                        curr_dict = curr_tmp
+                        inv_dict = inv_tmp
+			
+		"""if name == "eng":
 			curr_dict = eng_dict
 			inv_dict = inv_eng_dict
 		elif name == "eng_alt":
@@ -53,7 +64,7 @@ def calc_info_trajectory(df, need_prob, **opts):
                         pass
 
                 elif name == "mand_alt":
-                        pass
+                        pass"""
 
 		H_traj_dict[name] = {}
 
@@ -91,7 +102,7 @@ def calc_info_trajectory(df, need_prob, **opts):
 		UID_dev[name] = {}		
         for opt in H_traj_dict:
 		for traj in H_traj_dict[opt]:
-                	UID_dev[opt][traj] = calc_UID_deviation(H_traj_dict[opt][traj], len(inv_eng_dict[traj].split("-")))
+                	UID_dev[opt][traj] = calc_UID_deviation(H_traj_dict[opt][traj], len(inv_dict[traj].split("-")))
 
 	return H_traj_dict, UID_dev
 
@@ -110,6 +121,7 @@ def calc_conditional_probability_reconst_cost(word, target, need_prob, num_dict,
 	print(word)
 	print(selected_vals)
         print(need_prob)
+	print("target:" + str(target))
 	P_target = need_prob[find(selected_vals, target)[0]]
 	P_all = sum(need_prob)
         
@@ -161,7 +173,8 @@ def calc_UTC(**H_traj):
 
 
 def plot_area(area_dict):
-        colors = itertools.cycle(["r", "g", "b", "c", "m", "y", "k", "#e89600"])
+	print(area_dict)
+        colors = itertools.cycle(["m", "#1b5f7c", "b", "c", "m", "y", "k", "#e89600"])
         for name in area_dict:
                 points_x = []
                 points_y = []
@@ -182,33 +195,67 @@ def plot_area(area_dict):
 def plot_UID_vs_UTC(*H_traj):
         raise NotImplementedError
 
+
+def normalize_freq(freqs, upper_lim):
+	total = 0
+	new = {}
+	for num in freqs:
+		if int(num) in range(1, upper_lim + 1):
+			total += freqs[num]
+			new[int(num)] = freqs[num]
+
+	for num in new:
+		new[num] /= float(total)
+
+	return new
+
 if __name__ == "__main__":
 	number, lang_opts = read_file("atom_base.csv", 4)
 	#print(lang_opts)
+
 	eng_words, eng_mod, mand_words, mand_mod = lang_opts
 	f_np = open("data/need_probs/needprobs_eng_fit.csv", "r")
+	f_np_all = open("total_word_freq.p", "rb")
+	"""digit_freq_all = pickle.load(f_np_all)
+	digit_freq_mand = digit_freq_all["chinese"]
+	digit_freq_mand = normalize_freq(digit_freq_mand, 100)
+	mand_need_prob = []
+	print(sorted(digit_freq_mand.iterkeys()))
+	for key in sorted(digit_freq_mand.iterkeys()):
+		mand_need_prob.append(digit_freq_mand[key])
+
+	with open('data/need_probs/needprobs_mand.csv', 'wb') as myfile:
+    		wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+    		wr.writerow(mand_need_prob)
+	"""
+	f_np_mnd = open("data/need_probs/needprobs_mand.csv", "r")
 	f_num = pd.read_csv("data/terms_1_to_100/english.csv")
+	f_num_mand = pd.read_csv("data/terms_1_to_100/chinese_romanized.csv")
 	number_words = f_num["Reading"].values.tolist()
+	number_words_mand = f_num["Reading"].values.tolist()
+	df_m = pd.read_csv("data/terms_1_to_100/chinese_romanized.csv")
 	df = pd.read_csv("data/terms_1_to_100/english.csv")
 	need_probs = [float(i) for i in f_np.read().split("\r\n")[:-1]]
-	H_trajs, UID_dev = calc_info_trajectory(df, need_probs, eng=eng_words, eng_alt=eng_mod)
-        print(UID_dev)
+	need_probs_mnd = [float(i) for i in f_np_mnd.read().split("\r\n")[:-1]]
+	need_probs_mnd_smooth = [-0.018 * math.log(i) + 0.0738 for i in need_probs_mnd]
+	H_trajs, UID_dev = calc_info_trajectory(df_m, need_probs_mnd_smooth, mand=mand_words, mand_alt=mand_mod)
+        print(H_trajs)
         
-	area = calc_UTC(eng=H_trajs["eng"], eng_alt=H_trajs["eng_alt"])
+	area = calc_UTC(mand=H_trajs["mand"], mand_alt=H_trajs["mand_alt"])
 	plot_area(area)
 	
 	
-	eng_reg = UID_dev["eng"]
-	eng_alt = UID_dev["eng_alt"]
+	mand_reg = UID_dev["mand"]
+	mand_alt = UID_dev["mand_alt"]
         
-	for num in H_trajs["eng"]:
-                if num % 10 == 0 or (num == 11 or num == 12):
+	for num in H_trajs["mand"]:
+                if num % 10 == 0:
                         continue
-                title = str(num) + " (English)"
+                title = str(num) + " (Mandarin)"
                 plt.title(title)
-                plt.plot([0, 1, 2], H_trajs["eng"][num], color="blue", label="Attested")
-                plt.plot([0, 1, 2], H_trajs["eng_alt"][num], color="orange", label="Alternate")
-                name = "uid/" + str(num) + ".png"
+                plt.plot([0, 1, 2], H_trajs["mand"][num], color="blue", label="Attested")
+                plt.plot([0, 1, 2], H_trajs["mand_alt"][num], color="orange", label="Alternate")
+                name = "uid/mand" + str(num) + ".png"
                 plt.xlabel("Number of words")
                 plt.xticks([0, 1, 2])
                 plt.ylabel("Surprisal (bits)")
@@ -217,15 +264,15 @@ if __name__ == "__main__":
                 plt.gcf().clear()
 
         
-	lists = sorted(eng_reg.items())
-	lists = [item for item in lists if (item[0] % 10 != 0 and (num != 12 and num != 11))]
-	lists1 = sorted(eng_alt.items())
-	lists1 = [item for item in lists1 if (item[0] % 10 != 0 and (num != 12 and num != 11))]
+	lists = sorted(mand_reg.items())
+	lists = [item for item in lists if item[0] % 10 != 0]
+	lists1 = sorted(mand_alt.items())
+	lists1 = [item for item in lists1 if item[0] % 10 != 0]
 	
 	x, y = zip(*lists)
 	x1, y1 = zip(*lists1)
-	plt.plot(x, y, color="blue", label="English attested")
-	plt.plot(x1, y1, color="orange", label="English alternate")
+	plt.plot(x, y, color="cyan", label="Mandarin attested")
+	plt.plot(x1, y1, color="purple", label="Mandarin alternate")
 	plt.xlabel("Number")
 	plt.ylabel("UID deviation score")
 	plt.legend()
