@@ -178,11 +178,11 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
 			x_offset = offsets[lang][0]
 			y_offset = offsets[lang][1]
 		if (lang_info[lang][0], lang_info[lang][1]) not in seen:
-			ax.plot([lang_info[lang][0]], [lang_info[lang][1]], label=lang, marker='o', color=colorscheme[lang_info[lang][2]], markersize=5)
-			ax.annotate(lang, (lang_info[lang][0] + x_offset, lang_info[lang][1] + y_offset), size=7)
+			ax.plot([lang_info[lang][0]], [lang_info[lang][1]], label=lang, marker='o', color=colorscheme[lang_info[lang][2]], markersize=7)
+			ax.annotate(lang, (lang_info[lang][0] + x_offset, lang_info[lang][1] + y_offset), size=10)
 			seen.add((lang_info[lang][0], lang_info[lang][1]))
-	plt.xlabel("Complexity")
-	plt.ylabel("Communicative cost")
+	plt.xlabel("Complexity", fontsize="x-large")
+	plt.ylabel("Communicative cost", fontsize="x-large")
 
 	#hypothetical languages
 	comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity = hyp_lang_info

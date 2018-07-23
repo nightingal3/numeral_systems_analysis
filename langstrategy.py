@@ -13,11 +13,12 @@ import os
 """
 #might use for cleaniness, might not
 class Language:
-	def __init__(self, num_type, ulim, num_only=False):
+	def __init__(self, num_type, ulim, num_only=False, date=None):
 		self.num_type = num_type
 		self.ulim = ulim
 		self.forest = []
                 self.num_only = num_only
+		self.date = date
 
 	def get_num_type(self):
 		return self.num_type
@@ -28,6 +29,9 @@ class Language:
 	def get_forest(self):
 		return self.forest
 
+	def get_date(self):
+		return self.date
+
 	def add_rule(self, form, numeral, op):
 		self.forest.append(language_tree.make_tree(form, numeral, op, self.num_only))
                               
@@ -35,9 +39,16 @@ class Language:
                 for c in range(3):
                         self.forest.append(language_tree.make_tree(terms[c], c+1, "ONE", self.num_only))
 
-        def successors(self, terms, start, end):
+	def subitize_gen(self, terms):
+		for c in range(len(terms)):
+			self.forest.append(language_tree.make_tree(terms[c], c+1, "ONE", self.num_only))
+
+        def successors(self, start, end, terms=None):
+		if terms is None:
+			terms = [i for i in range(end)]
                 for c in range(start, end):
                         self.forest.append(language_tree.make_tree(terms[c], c+1, "SUC", self.num_only))
+
             
 def acg():
     num_type = 1
@@ -425,16 +436,62 @@ if __name__ == "__main__":
     #forest_disp(f, "mrt")
                                   
     #Old Irish
-    sga = Language(6, None, num_only=True)
+    sga = Language(6, None, num_only=True, date=750)
     sga.first_three([1, 2, 3]) 
-    for i in range(4, 10):
-        sga.add_rule(None, i, "SUC")
-    sga.add_rule(None, ["u", "ten"], "ADD")
-    sga.add_rule(None,  ["u", "twenty", "v"], "MTA")
+    sga.successors(4, 10)
+    sga.add_rule(None, ["u", 10], "ADD")
+    sga.add_rule(None,  ["u", 20, "v"], "MTA")
     sga.add_rule(None, ["u", "base"], "MUL")
-    sga.add_rule(None, ["u", "ten", "v"], "MTA")
-    sga.add_rule(None, ["ten", "two"], "POW")
+    sga.add_rule(None, ["u", 10, "v"], "MTA")
+    sga.add_rule(None, [10, 2], "POW")
     if not os.path.exists("language_objects"):
 	os.makedirs("language_objects")
     pickle.dump(sga, open("language_objects/sga.p", "w"))
-    #mem?
+   
+    #Irish
+    gle = Language(6, None, num_only=True, date=1106)
+    gle.first_three([1, 2, 3])
+    gle.successors(4, 10)
+    gle.add_rule(None, ["u", 10], "ADD")
+    gle.add_rule(None, ["u", 20], "ADD")
+    gle.add_rule(None, ["u", "base"], "MUL")
+    gle.add_rule(None, ["u", 10, "v"], "MTA")
+    gle.add_rule(None, [10, 2], "POW")
+    pickle.dump(gle, open("language_objects/gle.p", "w"))
+
+    #Welsh
+    cym = Language(6, None, num_only=True, date=(800, 900))
+    cym.first_three([1, 2, 3])
+    cym.successors(4, 10)
+    cym.add_rule(None, ["u", 10], "ADD")
+    cym.add_rule(None, ["u", 10, "v"], "MTA")
+    cym.add_rule(None, ["u", "base"], "ADD")
+    cym.add_rule(None, ["u", 10], "MUL")
+    cym.add_rule(None, [20, "u"], "ADD")
+    cym.add_rule(None, ["u", 20, "v"], "MTA")
+    cym.add_rule(None, ["u", 20], "MUL")
+    cym.add_rule(None, [100 , 2], "DIV")
+    cym.add_rule(None, [10, 2], "POW")
+    pickle.dump(cym, open("language_objects/cym.p", "w"))
+
+
+    #Cornish
+    cor = Language(6, None, num_only=True, date=(1200, 1250))
+    cor.first_three([1, 2, 3])
+    cor.successors(4, 10)
+    cor.add_rule(None, ["u", 10], "ADD")
+    cor.add_rule(None, ["u", 20], "ADD")
+    cor.add_rule(None, ["u", 20], "MUL")
+    cor.add_rule(None, ["u", 20, "v"], "MTA")
+    cor.add_rule(None, ["u", 10], "MUL")
+    cor.add_rule(None, ["u", 10, "v"], "MTA")
+    cor.add_rule(None, [10, 2], "POW")
+    pickle.dump(cor, open("language_objects/cor.p", "w"))
+
+    #Breton 
+    bre = Language(6, None, num_only=True, date=(750, 800))
+    bre.first_three([1, 2, 3])
+    bre.successors(4, 10)
+    bre.add_rule(None, ["u", 10], "ADD")
+    bre.add_rule(None, ["u", 20], "ADD")
+    
