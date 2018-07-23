@@ -4,10 +4,33 @@ import pandas as pd
 import math
 import sys
 from routines.find import *
+from routines.my_enumerate import *
 import matplotlib.pyplot as plt
 import itertools
 import pickle
 import csv
+import scipy.stats
+
+def do_plot(**langs, opt="all"):
+	"""Just call this function to plot things.
+	opts: all (UID, RAG, mini UID/RAG plots, plots for groups of 10)
+	uid: UID, mini plots
+	rag: RAG, mini plots
+	10s: plots for groups of 10"""
+	number, lang_opts = read_file("atom_base.csv", 4)
+	word_order_langs = {}
+	for i, lang_name in new_enumerate(langs, 0, 2):
+                title = lang_name + "_words"
+                title_alt = lang_name + "_alt"
+                word_order_langs[title] = lang_opts[i]
+                word_order_lang[title_alt] = lang_opts[i + 1]
+
+
+        #not done
+        return
+        
+
+
 
 def read_file(filename, num_opts):
 	f = open(filename, "r");
@@ -33,11 +56,11 @@ def read_file(filename, num_opts):
 
 def calc_info_trajectory(df, need_prob, **opts):	
 	curr_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
-	#curr_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
+	curr_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
 	inv_dict = {val: key for key, val in curr_dict.items()}
 	alt_dict = {"-".join(key.split("-")[::-1]): val for key, val in curr_dict.items()}
-	#del alt_eng_dict["teen-eigh"]
-	#alt_eng_dict["teen-eight"] = 18
+	del alt_dict["teen-eigh"]
+	alt_dict["teen-eight"] = 18
 	inv_alt_dict = {val: key for key, val in alt_dict.items()}
 	entropies = [val * math.log(1/float(val), 2) for val in need_prob] 
 	H_traj_dict = {}
@@ -53,19 +76,7 @@ def calc_info_trajectory(df, need_prob, **opts):
                         curr_dict = curr_tmp
                         inv_dict = inv_tmp
 			
-		"""if name == "eng":
-			curr_dict = eng_dict
-			inv_dict = inv_eng_dict
-		elif name == "eng_alt":
-			curr_dict = alt_eng_dict
-			inv_dict = inv_alt_eng_dict
-
-		elif name == "mand":
-                        pass
-
-                elif name == "mand_alt":
-                        pass"""
-
+	
 		H_traj_dict[name] = {}
 
 		for i in range(len(number)):
@@ -127,7 +138,7 @@ def calc_conditional_probability_reconst_cost(word, target, need_prob, num_dict,
         
         print(math.log(float(P_all) / float(P_target), 2))
         return math.log(float(P_all) / float(P_target), 2), selected_vals
-        #return float(P_target) / float(P_all), selected_vals
+        
 	
 def calc_conditional_entropy(word, need_prob, num_dict, inv_num_dict, numberline):
 	"""Depreciated"""
@@ -160,6 +171,7 @@ def calc_UID_deviation(H_traj, phrase_len):
 
 def calc_UTC(**H_traj):
 	#UTC stands for Uncertainty over Time Cost
+        #now called RAG (rapid information gain)
 	area = {}
 	for name, opt in H_traj.items():
 		area[name] = {}
@@ -174,7 +186,8 @@ def calc_UTC(**H_traj):
 
 def plot_area(area_dict):
 	print(area_dict)
-        colors = itertools.cycle(["m", "#1b5f7c", "b", "c", "m", "y", "k", "#e89600"])
+	i = 0
+        colors = itertools.cycle(["green", "red", "b", "c", "m", "y", "k", "#e89600"])
         for name in area_dict:
                 points_x = []
                 points_y = []
@@ -182,7 +195,7 @@ def plot_area(area_dict):
                         points_x.append(num)
                         points_y.append(area_dict[name][num])
 
-                plt.plot(points_x, points_y, color=next(colors), label=name)
+                plt.bar(points_x, points_y, color=next(colors), label=name, alpha=0.5)
 
         plt.xlabel("Number")
         plt.xticks([i for i in range(10, 100, 10)])
@@ -190,10 +203,6 @@ def plot_area(area_dict):
         plt.legend()
         plt.savefig("Area.png")
         plt.gcf().clear()
-
-        
-def plot_UID_vs_UTC(*H_traj):
-        raise NotImplementedError
 
 
 def normalize_freq(freqs, upper_lim):
@@ -209,12 +218,55 @@ def normalize_freq(freqs, upper_lim):
 
 	return new
 
+
+def plot_avg_bars(dict1, dict2, lang):
+	costs_1 = {}
+	costs_2 = {}
+	for i in range(10, 100, 10):
+		costs_1[i] = []
+		costs_2[i] = []
+
+	for num in dict1:
+		costs_1[(num / 10) * 10].append(dict1[num])
+		costs_2[(num / 10) * 10].append(dict2[num])
+
+	final_1 = []
+	mse_1 = []
+	final_2 = []
+	mse_2 = []
+	for num in sorted(costs_1):
+		total = 0
+		for cost in costs_1[num]:
+			total += cost
+		avg = float(total) / float(len(costs_1[num]))
+		final_1.append(avg)
+		mse_1.append(scipy.stats.sem(costs_1[num]))
+
+
+		total = 0
+		for cost in costs_2[num]:
+			total += cost
+		avg = float(total) / float(len(costs_2[num]))
+		final_2.append(avg)
+		mse_2.append(scipy.stats.sem(costs_2[num]))
+
+	print(final_2)
+	print(mse_2)
+        plt.gcf().clear()
+        plt.title("Cumulative surprisal (range of 10)", fontsize="x-large")
+	plt.bar([num for num in sorted(costs_1.keys())], final_1, yerr=mse_1, width=3, color="red", alpha=0.75, label="Attested")
+	plt.bar([num + 3 for num in sorted(costs_2.keys())], final_2, yerr=mse_2, width=3, color="green", alpha=0.75, label="Alternate")
+	plt.legend(fontsize="x-large")
+	plt.xlabel("Number", fontsize="x-large")
+	plt.ylabel("Surprisal (bits)", fontsize="x-large")
+	plt.savefig("test.png")
+	
 if __name__ == "__main__":
 	number, lang_opts = read_file("atom_base.csv", 4)
 	#print(lang_opts)
 
 	eng_words, eng_mod, mand_words, mand_mod = lang_opts
-	f_np = open("data/need_probs/needprobs_eng_fit.csv", "r")
+	f_np = open("data/need_probs/need_probs.csv", "r")
 	f_np_all = open("total_word_freq.p", "rb")
 	"""digit_freq_all = pickle.load(f_np_all)
 	digit_freq_mand = digit_freq_all["chinese"]
@@ -238,31 +290,38 @@ if __name__ == "__main__":
 	need_probs = [float(i) for i in f_np.read().split("\r\n")[:-1]]
 	need_probs_mnd = [float(i) for i in f_np_mnd.read().split("\r\n")[:-1]]
 	need_probs_mnd_smooth = [-0.018 * math.log(i) + 0.0738 for i in need_probs_mnd]
-	H_trajs, UID_dev = calc_info_trajectory(df_m, need_probs_mnd_smooth, mand=mand_words, mand_alt=mand_mod)
-        print(H_trajs)
+	total = 0
+	for i in range(len(need_probs_mnd_smooth)):
+		total += need_probs_mnd_smooth[i]
+	need_probs_mnd_smooth = [float(x)/float(total) for x in need_probs_mnd_smooth]
+	H_trajs, UID_dev = calc_info_trajectory(df, need_probs, eng=eng_words, eng_alt=eng_mod)
+        #plot_avg_bars(UID_dev["mand"], UID_dev["mand_alt"], "eng")
         
-	area = calc_UTC(mand=H_trajs["mand"], mand_alt=H_trajs["mand_alt"])
-	plot_area(area)
+	area = calc_UTC(eng=H_trajs["eng"], mand_alt=H_trajs["eng_alt"])
+	#plot_avg_bars(area["eng"], area["eng_alt"], "eng")
+	#plot_area(area)
 	
 	
-	mand_reg = UID_dev["mand"]
-	mand_alt = UID_dev["mand_alt"]
+	mand_reg = UID_dev["eng"]
+	mand_alt = UID_dev["eng_alt"]
         
-	for num in H_trajs["mand"]:
+	for num in H_trajs["eng"]:
                 if num % 10 == 0:
                         continue
-                title = str(num) + " (Mandarin)"
-                plt.title(title)
-                plt.plot([0, 1, 2], H_trajs["mand"][num], color="blue", label="Attested")
-                plt.plot([0, 1, 2], H_trajs["mand_alt"][num], color="orange", label="Alternate")
-                name = "uid/mand" + str(num) + ".png"
-                plt.xlabel("Number of words")
+               	title = str(num) + " (English)"
+                plt.title(title, fontsize="x-large")
+                plt.plot([0, 1, 2], H_trajs["eng"][num], color="blue", label="fif-teen") #attested
+                plt.plot([0, 1, 2], H_trajs["eng_alt"][num], color="orange", label="teen-fif") #alternate
+		plt.plot([0, 1, 2], [H_trajs["eng"][num][0], H_trajs["eng"][num][0] / 2, 0], color="red", label="UID")
+                name = "uid/" + str(num) + ".png"
+                plt.xlabel("Number of words", fontsize="x-large")
                 plt.xticks([0, 1, 2])
-                plt.ylabel("Surprisal (bits)")
-                plt.legend()
+                plt.ylabel("Surprisal (bits)", fontsize="x-large")
+                plt.legend(fontsize="x-large")
                 plt.savefig(name)
                 plt.gcf().clear()
-
+	
+	assert False
         
 	lists = sorted(mand_reg.items())
 	lists = [item for item in lists if item[0] % 10 != 0]
@@ -271,8 +330,11 @@ if __name__ == "__main__":
 	
 	x, y = zip(*lists)
 	x1, y1 = zip(*lists1)
-	plt.plot(x, y, color="cyan", label="Mandarin attested")
-	plt.plot(x1, y1, color="purple", label="Mandarin alternate")
+	#plt.plot(x, y, color="red", label="English attested")
+        plt.bar(x1, y1, color="green", label="English alternate", alpha=0.5)
+	plt.bar(x, y, color="red", label="English attested", alpha=0.5)
+	#plt.plot(x1, y1, color="green", label="English alternate")
+	
 	plt.xlabel("Number")
 	plt.ylabel("UID deviation score")
 	plt.legend()
