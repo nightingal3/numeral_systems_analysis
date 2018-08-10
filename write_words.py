@@ -1,6 +1,7 @@
 from num2words import num2words
 import csv
 import sys
+import pandas as pd
 
 def write_words(upper_bound, filename):
 	numfile = open(filename, "wb")
@@ -11,6 +12,11 @@ def write_words(upper_bound, filename):
 	
 	numfile.close()
 	print("Done.")
+
+
+def atom_base(upper_bound, numfile):
+	pass
+
 
 if __name__ == "__main__":
 	if len(sys.argv) != 3:
