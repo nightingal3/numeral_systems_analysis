@@ -54,13 +54,14 @@ def read_file(filename, num_opts):
 
 def calc_info_trajectory(df, need_prob, langname, maxval, **opts):	
 	curr_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
-	
+        irregulars = {}	
         #~~~~Special language spelling handling~~~~
 	if langname[:3] == "eng":
-                curr_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12, "onehundred-and": 100})
+                curr_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
                 separator = None
                 if langname == "eng_1000":
-                        curr_dict.update({"onehundred-and": 100, "twohundred-and": 200, "threehundred-and": 300, "fourhundred-and": 400, "fivehundred-and": 500, "sixhundred-and": 600, "sevenhundred-and": 700, "eighthundred-and": 800, "ninehundred-and": 900})
+                        irregulars = {"onehundred-and": 100, "twohundred-and": 200, "threehundred-and": 300, "fourhundred-and": 400, "fivehundred-and": 500, "sixhundred-and": 600, "sevenhundred-and": 700, "eighthundred-and": 800, "ninehundred-and": 900}
+                        curr_dict.update(irregulars)
         elif langname == "ger":
                 curr_dict.update({"sech": 6, "sieb": 7, "einund": 1, "zweiund": 2, "dreiund": 3, "vierund": 4, "funfund": 5, "sechsund": 6, "siebenund": 7, "achtund": 8, "neunund": 9})
                 separator = None
@@ -72,12 +73,18 @@ def calc_info_trajectory(df, need_prob, langname, maxval, **opts):
         elif langname == "fre":
                 curr_dict.update({"vingt-et": 20, "trente-et": 30, "quarante-et": 40, "cinquante-et": 50, "soixante-et": 60})
         
-	inv_dict = {val: key for key, val in curr_dict.items()}
+	inv_dict = {val: key for key, val in curr_dict.items() if key not in irregulars}
 	alt_dict = {"-".join(key.split("-")[::-1]): val for key, val in curr_dict.items()}
 
 	if langname[:3] == "eng":
                 #del alt_dict["teen-eigh"]
                 alt_dict["teen-eight"] = 18
+                teen_endings = ["-thir", "-fif", "-eigh"]
+                for key in irregulars:
+                        for teen in teen_endings:
+                                hund_teen = key + teen
+                                curr_dict[hund_teen] = curr_dict[key + teen + "-teen"]
+                        
 
         if langname == "spa":
                 alt_dict["uno-y"] = 1
@@ -96,7 +103,6 @@ def calc_info_trajectory(df, need_prob, langname, maxval, **opts):
                 
        
 	inv_alt_dict = {val: key for key, val in alt_dict.items()}
-	print(inv_alt_dict[18])
 	entropies = [val * math.log(1/float(val), 2) for val in need_prob] 
 	H_traj_dict = {}
 	alt_first = False
@@ -163,9 +169,12 @@ def calc_info_trajectory(df, need_prob, langname, maxval, **opts):
 	return H_traj_dict, UID_dev
 
 def calc_conditional_probability_reconst_cost(word, target, target_len, need_prob, num_dict, inv_num_dict, langname, numberline):
+        if word == "onehundred-and-thir":
+                print("Yo")
         if word[-4:] == "-and":
                 raw_word = word[:-4]
                 word_val = num_dict[raw_word]
+
         elif (len(word.split('-')) > 1 and word.split('-')[1] == "vingts") and inv_num_dict[18].split("-")[0] == "huit": #un-vingts, deux-vingts are technically meaningless (formatting issue)
                 word_val = None
         else:
@@ -280,6 +289,8 @@ def plot_area(area_dict, langname, maxval):
         points_alt_x = []
         points_alt_y = []
 	for num in area_dict[first]:
+                if num > maxval:
+                        break
                 points_alt_x.append(num)
                 points_alt_y.append(area_dict[first][num])
         if langname == "Universal":
@@ -291,22 +302,14 @@ def plot_area(area_dict, langname, maxval):
         points_x = []
         points_y = []
 	for num in area_dict[second]:
+                if num > maxval:
+                        break
                 points_x.append(num)
                 points_y.append(area_dict[second][num])
         if langname == "Universal":
                 plt.bar(points_x, points_y, color="red", label="atom-base", alpha=0.5)
         else:
                 plt.bar(points_x, points_y, color="red", label=second, alpha=0.5)
-                
-        """colors = itertools.cycle(["green", "red", "b", "c", "m", "y", "k", "#e89600"])
-        for name in area_dict:
-                points_x = []
-                points_y = []
-                for num in area_dict[name]:
-                        points_x.append(num)
-                        points_y.append(area_dict[name][num])
-
-                plt.bar(points_x, points_y, color=next(colors), label=name, alpha=0.5)"""
 
         plt.xlabel("Number")
         plt.xticks([i for i in range(10, maxval, maxval / 10)])
@@ -407,16 +410,7 @@ def plot_mini(H_trajs, langname, color1="blue", color2="orange"):
                 
 	
 if __name__ == "__main__":
-	number, eng_words_1000, eng_mod_1000 = generate_attested_and_alternate("data/terms_1_to_100/english_1000.csv")
-		
-        """print(calc_UID_deviation([1, 0, 0, 0, 0, 0, 0, 0], 7))
-        print(calc_UID_deviation([1, 0, 0, 0, 0, 0, 0], 6))
-        print(calc_UID_deviation([1, 0, 0, 0, 0, 0], 5))
-        print(calc_UID_deviation([1, 0, 0, 0, 0], 4))
-        print(calc_UID_deviation([1, float(2)/3, float(1)/3, 0], 3))
-        print(calc_UID_deviation([1, float(1)/2, 0], 2))
-        print(calc_UID_deviation([11.126891964388447, 5.423221562923075, 2.360620371433961, 0.0], 3))
-        assert False"""
+	number, eng_words_1000, eng_mod_1000 = generate_attested_and_alternate("data/terms_1_to_100/english_1000.csv")		
 	#number, lang_opts = read_file("atom_base.csv", 12)
 	#eng_words, eng_mod, mand_words, mand_mod, ger_words, ger_mod, spanish_words, spanish_mod, french_words, french_mod, italian_words, italian_mod = lang_opts
 	
@@ -453,13 +447,14 @@ if __name__ == "__main__":
 	need_probs_all = [float(i) for i in f_np_all.read().split("\r\n")[:-1]]
 	
 	H_trajs, UID_dev = calc_info_trajectory(df_1000, need_probs_1000, "eng_1000", 1000, eng_1000_alt=eng_mod_1000, eng_1000=eng_words_1000)
-	#print(H_trajs["uni_alt"])
-	#print(UID_dev["spa"])
-        #plot_avg_bars(UID_dev["spa"], UID_dev["spa_alt"], "spa")
 
+
+        #print(H_trajs["eng_1000"][151])
+        #print(H_trajs["eng_1000_alt"][151])
+        #print(UID_dev["eng_1000"])
+        #print(UID_dev["eng_1000_alt"])
         
 	area = calc_UTC(eng_1000_alt=H_trajs["eng_1000_alt"], eng_1000=H_trajs["eng_1000"])
-	#plot_avg_bars(area["spa"], area["spa_alt"], "spa")
 	plot_area(area, "English", 1000)
 	mand_reg = UID_dev["eng_1000"]
 	mand_alt = UID_dev["eng_1000_alt"]
@@ -480,6 +475,7 @@ if __name__ == "__main__":
 	plt.bar(x, y, color="red", label="English attested", alpha=0.5)
 	
 	plt.xlabel("Number")
+	#plt.xlim(10,100)
 	plt.ylabel("UID deviation score")
 	plt.legend()
 	plt.title("UID deviation")
