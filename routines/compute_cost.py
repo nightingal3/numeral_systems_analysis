@@ -5,7 +5,6 @@ import math
 from find import find
 
 def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_range=range(20), w=0.31):
-
 	cc = 1 / (math.sqrt(2) * w)
 	nnum = len(numberline)
 
@@ -16,7 +15,9 @@ def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_rang
 	(mus, P_w_i_vec) = compute_P_w_i_match_modemap(mmap, numberline, nterm, term_num_map, mu_range, cc, w, nd)
 	mus = [i+1 for i in mus]	
 	F_i_w_numerator = compute_f_i_w_numerator(nnum, nterm, numberline, mus, cc, w)
-	
+	#Bayesian listener
+	F_i_w_numerator = np.multiply(F_i_w_numerator, nd)
+	#
 	log_prob_L = np.zeros((1, nnum))
 	
 	for j in range(nterm):
@@ -35,12 +36,15 @@ def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_rang
 
 def compute_cost_size_principle(upper_lim, need_prob):
 	length = len(need_prob)
-	unit_cost = [0] * length	
+	unit_cost = [0] * length
 	denom = length - (upper_lim + 1) + 1
 	for i in range(upper_lim, length):
 		unit_cost[i] = -math.log(float(1)/float(denom), 2)
-	c0 = np.asarray(need_prob) * np.asarray(unit_cost) 
-
+                #unit_cost[i] = need_prob[i]
+	#	
+	unit_cost = np.asarray(unit_cost) * np.asarray(need_prob)
+	#
+	c0 = np.sum(np.multiply(need_prob, unit_cost))
         return c0.sum()
 
 
@@ -53,7 +57,10 @@ def compute_cost_size_principle_arb(modemap, need_prob):
 		inds = [j for j, val in enumerate(modemap) if modemap[j] == unique_cat[i]]
 		for ind in inds:
 			unit_cost[ind] = -math.log(float(1)/float(len(inds)), 2)
-
+                        #unit_cost[ind] = need_prob[ind]
+	#
+        unit_cost = np.asarray(unit_cost) * np.asarray(need_prob)
+        #
 	return sum(np.multiply(need_prob, unit_cost))
 			
 
@@ -61,4 +68,4 @@ if __name__ == "__main__":
 	f = open("../data/need_probs/needprobs_eng_fit.csv")
 	nd = [float(i) for i in f.read().split("\r\n")[:-1]]
 	print(compute_approx_cost(["hoi1", "hoi2", "aibaagi"], [i for i in range(1, 101)], [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, nd, [i for i in range(20)], 0.31))
-
+        print(compute_cost_size_principle(3, nd))

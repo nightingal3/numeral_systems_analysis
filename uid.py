@@ -9,7 +9,10 @@ import matplotlib.pyplot as plt
 import itertools
 import pickle
 import csv
+import random
+import decimal
 import scipy.stats
+
 
 def generate_attested_and_alternate(filename):
 	#given a file containing terms in a range, generate the attested and reverse and return in same format as read_file
@@ -29,7 +32,8 @@ def generate_attested_and_alternate(filename):
 
 	return number, attested_opt, alternate_opt
 
-	
+
+
 def read_file(filename, num_opts):
 	f = open(filename, "r")
 	number = []
@@ -43,7 +47,7 @@ def read_file(filename, num_opts):
 		
                 for j in range(len(langs)):
                         if j == len(langs) - 1:
-                                langs[j].append(split_line[j + 1][:-2].split("-")) #for some reason lines end with \r\n
+                                langs[j].append(split_line[j + 1][:-2].split("-")) 
                         else:
                                 langs[j].append(split_line[j + 1].split("-"))
                                 
@@ -51,8 +55,169 @@ def read_file(filename, num_opts):
 	f.close()
 	return number, langs
 
+def shuffle_test_2(times, df, need_prob, langname, maxval, real_11_19_mean, real_21_29_mean, **opts):
+        alt_name = langname + "_alt"
+        num_greater = 0 #only doing 21-29 for now since that's where a difference is expected
+        
+        mean_teens = []
+        mean_teens_alt = []
+        mean_twenties = []
+        mean_twenties_alt = []
+        diff_mean_teens = []
+        diff_mean_twenties = []
+        
+        
+        for i in range(times):
+                H_traj_dict, UID_dev = calc_info_trajectory(df, need_prob, langname, maxval, True, **opts)
+                teens = []
+                teens_alt = []
+                twenties = []
+                twenties_alt = []
+                for key in range(11, 20):
+                        if len(H_traj_dict[langname][key]) == 0 or len(H_traj_dict[alt_name][key]) == 0:
+                                continue
+                        teens.extend(H_traj_dict[langname][key])
+                        teens_alt.extend(H_traj_dict[alt_name][key])
+                for key in range(21, 30):
+                        if len(H_traj_dict[langname][key]) == 0 or len(H_traj_dict[alt_name][key]) == 0:
+                                continue
+                        twenties.extend(H_traj_dict[langname][key])
+                        twenties_alt.extend(H_traj_dict[alt_name][key])
+                        
+                avg_teens = float(sum(teens))/len(teens)
+                avg_teens_alt = float(sum(teens_alt))/len(teens_alt)
+                avg_twenties = float(sum(teens))/len(teens)
+                avg_twenties_alt = float(sum(teens_alt))/len(teens_alt)
+                mean_teens.append(avg_teens)
+                mean_teens_alt.append(avg_teens_alt)
+                mean_twenties.append(avg_twenties)
+                mean_twenties_alt.append(avg_twenties_alt)
 
-def calc_info_trajectory(df, need_prob, langname, maxval, **opts):	
+                diff_teens = avg_teens_alt - avg_teens
+                diff_twenties = avg_twenties_alt - avg_twenties
+                diff_mean_teens.append(diff_teens)
+                diff_mean_twenties.append(diff_twenties)
+
+                if diff_twenties >= real_21_29_mean:
+                        num_greater += 1
+
+        mean_11_19 = sum(mean_teens)/len(mean_teens)
+        mean_11_19_alt = sum(mean_teens_alt)/len(mean_teens_alt)
+        mean_21_29 = sum(mean_twenties)/len(mean_twenties)
+        mean_21_29_alt = sum(mean_twenties_alt)/len(mean_twenties_alt)
+        avg_diff_mean_twenties = sum(diff_mean_twenties)/len(diff_mean_twenties)
+        avg_diff_mean_teens = sum(diff_mean_teens)/len(diff_mean_teens)
+
+        print("REPORT")
+        print("------")
+        print("Mean (11-19), attested: %f\nMean (11-19), alternate: %f\nMean (21-29), attested: %f\nMean (21-29), alternate: %f\n" % (mean_11_19, mean_11_19_alt, mean_21_29, mean_21_29_alt))
+        print("Difference between 11-19 and 21-29: %.15f\n" %(avg_diff_mean_twenties - avg_diff_mean_teens))
+        print("Average difference in mean (21-29): %.15f\n" % (avg_diff_mean_twenties))
+        print("p-value (%d trials): %.15f\n" % (times, float(num_greater)/times))
+
+
+        plt.hist(diff_mean_twenties, bins=np.arange(min(diff_mean_twenties), max(diff_mean_twenties) + 0.1, 0.1))
+        plt.title("Difference (alternate - attested) in the 21-29 group, %d trials" % (times))
+        plt.xlabel("Mean difference")
+        plt.ylabel("Number of occurrences")
+        plt.savefig("meandiff_twenties.png")
+
+        return avg_diff_mean_teens_avg_diff_mean_twenties
+        
+
+
+def shuffle_test(times, df, need_prob, langname, maxval, **opts):
+        
+        teens_info = {}
+        teens_info_alt = {}
+        twenties_info = {}
+        twenties_info_alt = {}
+        teens_uid = {}
+        twenties_uid = {}
+
+        for i in range(11, 30):
+                if i % 10 == 0:
+                        continue
+                if i > 10 and i < 20:
+                        teens_info[i] = []
+                        teens_info_alt[i] = []
+                        teens_uid[i] = []
+                elif i > 20 and i < 30:
+                        twenties_info[i] = []
+                        twenties_info_alt[i] = []
+                        twenties_uid[i] = []
+        
+        
+        for i in range(times):
+                H_traj_dict, UID_dev = calc_info_trajectory(df, need_prob, langname, maxval, True, **opts)
+                for opt in H_traj_dict:
+                        if opt[-3:] == "alt":
+                                append_teens = teens_info_alt
+                                append_teens_alt = teens_info
+                                append_twenties = twenties_info_alt
+                                append_twenties_alt = twenties_info
+                        else:
+                                append_teens = teens_info
+                                append_teens_alt = teens_info_alt
+                                append_twenties = twenties_info
+                                append_twenties_alt = twenties_info_alt
+                                
+                        for key in H_traj_dict[opt]:
+                                if key > 10 and key < 20:
+                                        append_teens[key].append(sum(H_traj_dict[opt][key]))
+                                        #teens_uid[key].append(UID_dev[key])
+                                elif key > 20 and key < 30:
+                                        append_twenties[key].append(sum(H_traj_dict[opt][key]))
+                                        #twenties_uid[key].append(UID_dev[[opt]key])
+        
+        diff_info_teens = {}
+        diff_info_twenties = {}
+        for key in teens_info:
+                if len(teens_info[key]) == 0:
+                        continue
+                diff_info_teens[key] = []
+                for i in range(len(teens_info[key])):
+                        diff_info_teens[key].append(teens_info[key][i] - teens_info_alt[key][i])
+        for key in twenties_info:
+                if len(twenties_info[key]) == 0:
+                        continue
+                diff_info_twenties[key] = []
+                for i in range(len(twenties_info[key])):
+                        diff_info_twenties[key].append(twenties_info[key][i] - twenties_info_alt[key][i])
+        
+       
+        
+        avg_diff_teens = {}
+        avg_diff_twenties = {}
+        for key in diff_info_teens:
+                avg_diff_teens[key] = sum(diff_info_teens[key])/len(diff_info_teens[key])
+        for key in diff_info_twenties:
+                avg_diff_twenties[key] = sum(diff_info_twenties[key])/len(diff_info_twenties[key])
+        print(avg_diff_teens.values())
+        print(avg_diff_twenties.values())
+        sd_teens = np.std(avg_diff_teens.values())
+        sd_twenties = np.std(avg_diff_twenties.values())
+        
+        avg_diff_teens_2 = 0
+        avg_diff_twenties_2 = 0
+        for key in avg_diff_teens:
+                avg_diff_teens_2 += avg_diff_teens[key]
+        avg_diff_teens_2 /= len(avg_diff_teens.keys())
+        for key in avg_diff_twenties:
+                avg_diff_twenties_2 += avg_diff_twenties[key]
+        avg_diff_twenties_2 /= len(avg_diff_twenties.keys())
+        
+       
+        return avg_diff_teens_2, sd_teens, avg_diff_twenties_2, sd_twenties
+
+
+
+        
+def calc_info_trajectory(df, need_prob, langname, maxval, shuffle, **opts):
+        if shuffle == True:
+                random.shuffle(need_prob)
+
+                
 	curr_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
         irregulars = {}	
         #~~~~Special language spelling handling~~~~
@@ -127,7 +292,7 @@ def calc_info_trajectory(df, need_prob, langname, maxval, **opts):
 		for i in range(len(number)):
 			curr_num = number[i]
 			phrase = opt[i]
-			print(phrase)
+			#print(phrase)
 			selected_vals = []
 			base_H = math.log(1/need_prob[curr_num - 1], 2)
 			H_seq = [base_H]
@@ -169,8 +334,6 @@ def calc_info_trajectory(df, need_prob, langname, maxval, **opts):
 	return H_traj_dict, UID_dev
 
 def calc_conditional_probability_reconst_cost(word, target, target_len, need_prob, num_dict, inv_num_dict, langname, numberline):
-        if word == "onehundred-and-thir":
-                print("Yo")
         if word[-4:] == "-and":
                 raw_word = word[:-4]
                 word_val = num_dict[raw_word]
@@ -194,7 +357,8 @@ def calc_conditional_probability_reconst_cost(word, target, target_len, need_pro
                 irregulars = ["vingt-et", "trente-et", "quarante-et", "cinquante-et", "soixante-et", "onze-et"]
                 
 	for num in numberline:
-                minlen = min(len(word), len(inv_num_dict[num]))
+                #minlen = min(len(word), len(inv_num_dict[num]))
+                minlen = len(word)
                 minmatch = word[:minlen] == inv_num_dict[num][:minlen]
                 if len(word.split('-')) == target_len:
                         if word_val == num:
@@ -220,14 +384,14 @@ def calc_conditional_probability_reconst_cost(word, target, target_len, need_pro
 		print("Error: word '%s' does not refer to any number. Ensure all input words are correct." % word)
 		sys.exit(1);
 
-	print(word)
-	print(selected_vals)
-        print(need_prob)
-	print("target:" + str(target))
+	#print(word)
+	#print(selected_vals)
+        #print(need_prob)
+	#print("target:" + str(target))
 	P_target = need_prob[find(selected_vals, target)[0]]
 	P_all = sum(need_prob)
         
-        print(math.log(float(P_all) / float(P_target), 2))
+        #print(math.log(float(P_all) / float(P_target), 2))
         return math.log(float(P_all) / float(P_target), 2), selected_vals
         
 	
@@ -334,7 +498,7 @@ def normalize_freq(freqs, upper_lim):
 	return new
 
 
-def plot_avg_bars(dict1, dict2, lang):
+def plot_avg_bars(dict1, dict2, lang, plt=True):
 	costs_1 = {}
 	costs_2 = {}
 	for i in range(10, 100, 10):
@@ -364,17 +528,19 @@ def plot_avg_bars(dict1, dict2, lang):
 		avg = float(total) / float(len(costs_2[num]))
 		final_2.append(avg)
 		mse_2.append(scipy.stats.sem(costs_2[num]))
+        print(final_2[0] - final_1[0])
+        print(final_2[1] - final_1[1])
+	if plt:
+                plt.gcf().clear()
+                plt.title("Cumulative surprisal (range of 10)", fontsize="x-large")
+                plt.bar([num for num in sorted(costs_1.keys())], final_1, yerr=mse_1, width=3, color="red", alpha=0.75, label="Attested")
+                plt.bar([num + 3 for num in sorted(costs_2.keys())], final_2, yerr=mse_2, width=3, color="green", alpha=0.75, label="Alternate")
+                plt.legend(fontsize="x-large")
+                plt.xlabel("Number", fontsize="x-large")
+                plt.ylabel("Surprisal (bits)", fontsize="x-large")
+                plt.savefig("test.png")
 
-	print(final_2)
-	print(mse_2)
-        plt.gcf().clear()
-        plt.title("Cumulative surprisal (range of 10)", fontsize="x-large")
-	plt.bar([num for num in sorted(costs_1.keys())], final_1, yerr=mse_1, width=3, color="red", alpha=0.75, label="Attested")
-	plt.bar([num + 3 for num in sorted(costs_2.keys())], final_2, yerr=mse_2, width=3, color="green", alpha=0.75, label="Alternate")
-	plt.legend(fontsize="x-large")
-	plt.xlabel("Number", fontsize="x-large")
-	plt.ylabel("Surprisal (bits)", fontsize="x-large")
-	plt.savefig("test.png")
+	return final_1[10], mse_1, final_2[10], mse_2
 
 
 def plot_mini(H_trajs, langname, color1="blue", color2="orange"):
@@ -387,7 +553,7 @@ def plot_mini(H_trajs, langname, color1="blue", color2="orange"):
                 plt.title(title, fontsize="x-large")
                 length = len(H_trajs[langname][num])
                 numberline = [i for i in range(length)]
-                print(H_trajs[langname][num])
+                #print(H_trajs[langname][num])
                 plt.plot(numberline, H_trajs[langname][num], color=color1, label="Attested") #attested
                 plt.plot(numberline, H_trajs[alt][num], color=color2, label="Alternate") #alternate
                 uid_traj = [H_trajs[langname][num][0]]
@@ -396,8 +562,8 @@ def plot_mini(H_trajs, langname, color1="blue", color2="orange"):
                 for i in range(1, length - 1):
                     uid_traj.append(H_trajs[langname][num][0] - i * frac)
                 uid_traj.append(0)
-                print("UID:")
-                print(uid_traj)
+                #print("UID:")
+                #print(uid_traj)
 		plt.plot(numberline, uid_traj, color="red", label="UID")
                 name = "uid/" + langname + "/" + str(num) + ".png"
                 plt.xlabel("Number of words", fontsize="x-large")
@@ -410,9 +576,10 @@ def plot_mini(H_trajs, langname, color1="blue", color2="orange"):
                 
 	
 if __name__ == "__main__":
-	number, eng_words_1000, eng_mod_1000 = generate_attested_and_alternate("data/terms_1_to_100/english_1000.csv")		
-	#number, lang_opts = read_file("atom_base.csv", 12)
-	#eng_words, eng_mod, mand_words, mand_mod, ger_words, ger_mod, spanish_words, spanish_mod, french_words, french_mod, italian_words, italian_mod = lang_opts
+
+	#number, eng_words_1000, eng_mod_1000 = generate_attested_and_alternate("data/terms_1_to_100/english_1000.csv")		
+	number, lang_opts = read_file("atom_base.csv", 12)
+	eng_words, eng_mod, mand_words, mand_mod, ger_words, ger_mod, spanish_words, spanish_mod, french_words, french_mod, italian_words, italian_mod = lang_opts
 	
 	f_np = open("data/need_probs/eng_num_pos.csv", "r")
 	f_np_1000 = open("data/need_probs/eng_1_to_1000.csv", "r")
@@ -445,15 +612,25 @@ if __name__ == "__main__":
 	need_probs_ita = [float(i) for i in f_np_ita.read().split("\r\n")[:-1]]
 	need_probs_fre = [float(i) for i in f_np_fre.read().split("\r\n")[:-1]]
 	need_probs_all = [float(i) for i in f_np_all.read().split("\r\n")[:-1]]
+
+		
 	
-	H_trajs, UID_dev = calc_info_trajectory(df_1000, need_probs_1000, "eng_1000", 1000, eng_1000_alt=eng_mod_1000, eng_1000=eng_words_1000)
-
-
-        #print(H_trajs["eng_1000"][151])
-        #print(H_trajs["eng_1000_alt"][151])
-        #print(UID_dev["eng_1000"])
-        #print(UID_dev["eng_1000_alt"])
+	H_trajs, UID_dev = calc_info_trajectory(df_m, need_probs_all, "mand", 100, False, mand_alt=mand_mod, mand=mand_words)
+	H_cumulative = {}
+	for num in H_trajs["mand"]:
+                H_trajs["mand"][num] =  sum(H_trajs["mand"][num]) #change it to the cumulative
+        for num in H_trajs["mand_alt"]:
+                H_trajs["mand_alt"][num] =  sum(H_trajs["mand_alt"][num]) #change it to the cumulative
+                
+        #print(H_trajs["eng"])
+        #print(H_trajs["eng_alt"])
         
+        #print(plot_avg_bars(H_trajs["mand"], H_trajs["mand_alt"], "mand", plt=False))
+        
+        shuffle_test_2(100000, df_m, need_probs_all, "mand", 100, 0.00476, 1.74, mand_alt=mand_mod, mand=mand_words)
+	
+	
+	assert False
 	area = calc_UTC(eng_1000_alt=H_trajs["eng_1000_alt"], eng_1000=H_trajs["eng_1000"])
 	plot_area(area, "English", 1000)
 	mand_reg = UID_dev["eng_1000"]

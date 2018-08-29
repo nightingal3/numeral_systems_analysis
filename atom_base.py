@@ -293,8 +293,8 @@ def plot_individual_bars(numbers, opt1, opt2, langname):
         print(numbers)
         label1 = langname + " alternate"
         label2 = langname + " attested"
-        plt.bar(numbers, areas2, color="green", alpha=0.5, label=label1)
 	plt.bar(numbers, areas1, color="red", alpha=0.5, label=label2)
+	plt.bar(numbers, areas2, color="green", alpha=0.5, label=label1)
 	plt.title("Rapid Error Reduction (" + langname + ")")
 	plt.xlabel("Numeral")
 	plt.ylabel("Cumulative Error")
@@ -316,13 +316,14 @@ if __name__ == "__main__":
         eng_dictionary = {"one": 1, "two": 2, "three": 3, "thir": 3, "four": 4, "five": 5, "fif": 5, "six": 6, "seven": 7, "eight": 8, "eigh": 8, "nine": 9, "teen": 10, "eleven": 11, "twelve": 12, "twenty": 20, "thirty": 30, "fourty": 40,
                           "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90}
         chn_dictionary = {"yi": 1, "er": 2, "san": 3, "si": 4, "wu": 5, "liu": 6, "qi": 7, "ba": 8, "jiu": 9, "shi": 10, "ershi": 20, "sanshi": 30, "sishi": 40, "wushi": 50, "liushi": 60, "qishi": 70, "bashi": 80, "jiushi": 90}
-        ger_dictionary = {"eins": 1, "zwei": 2, "drei": 3, "vier": 4, "funf": 5}
+        ger_dictionary = {"elf": 11, "zwolf": 12, "eins": 1, "einund": 1, "zwei": 2, "zweiund": 2, "drei": 3, "dreiund": 3, "vier": 4, "vierund": 4, "funf": 5, "funfund": 5, "sechs": 6, "sechsund": 6, "sech": 6, "sieben": 7, "siebenund": 7, "sieb": 7,
+                          "acht": 8, "achtund": 8, "neun": 9, "neunund": 9, "zehn": 10, "zwanzig": 20, "dreisig": 30, "vierzig": 40, "funfzig": 50, "sechzig": 60, "siebzig": 70, "achtzig": 80, "neunzig": 90}
 	#print(find_area([(0, 21), (6, 1), (9, 0)], [(0, 21), (3, 20), (9, 0)]))
 	#assert False
-	x = err_over_time_2("atom_base.csv", 3, chn_dictionary)
+	x = err_over_time_2("atom_base.csv", 5, ger_dictionary)
        	#print(x[1])
        	
-        plot_individual_bars(x[0], x[1], x[2], "Mandarin")
+        plot_individual_bars(x[0], x[1], x[2], "German")
         #diff = plot_err_comparison(x[0], x[1], x[2])
 
 		

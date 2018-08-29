@@ -46,6 +46,9 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
 
 def compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange):
 	F_i_w_numerator = compute_f_i_w_numerator(nnum, nterm, numberline, mus, c, w)
+	#Bayesian listener
+	F_i_w_numerator = np.multiply(F_i_w_numerator, need_probs)
+	#
 	term_num_map = np.zeros((nterm, nnum))
 	maxind = find(F_i_w_numerator, np.amax(F_i_w_numerator, 0), axis=1)
 	maxmaxind = find(maxind, max(maxind))
@@ -67,8 +70,7 @@ def compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange):
 		cat_inds = find(mmap, j)
 		f = F_i_w_numerator[j, cat_inds]
 		for ind in range(len(cat_inds)):	
-			log_prob_L[0, cat_inds[ind]] = f[ind] / sum(f)
-
+			log_prob_L[0, cat_inds[ind]] = (f[ind] / sum(f))
 	log_prob_L = np.log2(log_prob_L)
 	
 

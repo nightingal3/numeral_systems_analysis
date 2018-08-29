@@ -18,7 +18,20 @@ def compute_P_w_i(nnum, ncat, numberline, mus, c, w):
 	
 	return P_w_i	
 	
-
+def compute_P_w_i_bayesian_listener(nnum, ncat, numberline, mus, c, w):
+	bias = np.ones((ncat, 1))
+	Js = np.tile(numberline, (ncat, 1))
+	Means = np.tile(mus, (1, nnum))
+	BiasMat = np.tile(bias, (1, nnum))
+	
+	P_w_i_vec = np.divide(1, math.sqrt(2 * math.pi) * w * Means) * np.exp(np.divide(-np.square(Js-Means), 2 * np.square(w * Means)))
+	
+	PP = np.multiply(P_w_i_vec, BiasMat)
+	Norm = PP.sum(axis=0)
+	P_w_i = np.divide(PP, np.tile(Norm, (ncat, 1)))
+	
+	return P_w_i	
+	
 
 
 
@@ -96,8 +109,6 @@ def compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subr
 	bias_mat = np.tile(np.array(bias), (1, nnum))
 	
 	f_i_w = np.multiply(np.divide(1, np.multiply(math.sqrt(2*math.pi)*w, means)),np.exp(np.divide(-(Js-means)** 2 ,  2 * (w*means)** 2)))
-
-
 		
 	#Assume always correct in subitizing range
 	for i in range(len(subrange)):
@@ -109,7 +120,6 @@ def compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subr
 	norm = P_i_w.sum(axis=0)
 	#normalize
 
-	#P_i_w = np.divide(P_i_w, np.multiply(np.tile(norm, (ncat, 1)), np.tile(total_mass, (ncat, 1))))
 	P_i_w = np.multiply(np.divide(P_i_w, np.tile(norm, (ncat, 1))), np.tile(total_mass, (ncat, 1)))
 	
 	return P_i_w
@@ -119,11 +129,8 @@ def compute_f_i_w_numerator(nnum, ncat, numberline, mus, cc, w):
 	mus = np.asarray(mus).reshape((-1, 1))
 	Js = np.tile(numberline, (ncat, 1))
 	Means = np.tile(mus, (1, nnum))
-	#mus = np.asarray(mus).reshape((-1, 1))
-	#assert False
-	f_i_w_vec = np.divide(1, math.sqrt(2*math.pi) * w * Means) * np.exp(-(Js - Means) ** 2 / (2 * (w * Means) ** 2))
 	
-	#f_i_w_vec = np.multiply(np.divide(1, np.multiply(math.sqrt(2*math.pi)*w, Means)),np.exp(np.divide(-(Js-Means)** 2 ,  2 * (w*Means)** 2)))
+	f_i_w_vec = np.divide(1, math.sqrt(2*math.pi) * w * Means) * np.exp(-(Js - Means) ** 2 / (2 * (w * Means) ** 2))
 
 
 	return f_i_w_vec

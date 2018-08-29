@@ -418,7 +418,7 @@ def xoo():
 
 # helper functions for common language aspects
 
-def first_three(forest, terms, num_only):
+def first_three(forest, terms, num_only=False):
     for c in range(3):
         forest.append(language_tree.make_tree(terms[c], c+1, "ONE", num_only))
          
@@ -448,50 +448,8 @@ if __name__ == "__main__":
 	os.makedirs("language_objects")
     pickle.dump(sga, open("language_objects/sga.p", "w"))
    
-    #Irish
-    gle = Language(6, None, num_only=True, date=1106)
-    gle.first_three([1, 2, 3])
-    gle.successors(4, 10)
-    gle.add_rule(None, ["u", 10], "ADD")
-    gle.add_rule(None, ["u", 20], "ADD")
-    gle.add_rule(None, ["u", "base"], "MUL")
-    gle.add_rule(None, ["u", 10, "v"], "MTA")
-    gle.add_rule(None, [10, 2], "POW")
-    pickle.dump(gle, open("language_objects/gle.p", "w"))
+    #Ainu
+    ain = Language(4, None, num_only=False)
+    ain.first_three(["sine", "tu", "re", "ine", "asikne"])
 
-    #Welsh
-    cym = Language(6, None, num_only=True, date=(800, 900))
-    cym.first_three([1, 2, 3])
-    cym.successors(4, 10)
-    cym.add_rule(None, ["u", 10], "ADD")
-    cym.add_rule(None, ["u", 10, "v"], "MTA")
-    cym.add_rule(None, ["u", "base"], "ADD")
-    cym.add_rule(None, ["u", 10], "MUL")
-    cym.add_rule(None, [20, "u"], "ADD")
-    cym.add_rule(None, ["u", 20, "v"], "MTA")
-    cym.add_rule(None, ["u", 20], "MUL")
-    cym.add_rule(None, [100 , 2], "DIV")
-    cym.add_rule(None, [10, 2], "POW")
-    pickle.dump(cym, open("language_objects/cym.p", "w"))
-
-
-    #Cornish
-    cor = Language(6, None, num_only=True, date=(1200, 1250))
-    cor.first_three([1, 2, 3])
-    cor.successors(4, 10)
-    cor.add_rule(None, ["u", 10], "ADD")
-    cor.add_rule(None, ["u", 20], "ADD")
-    cor.add_rule(None, ["u", 20], "MUL")
-    cor.add_rule(None, ["u", 20, "v"], "MTA")
-    cor.add_rule(None, ["u", 10], "MUL")
-    cor.add_rule(None, ["u", 10, "v"], "MTA")
-    cor.add_rule(None, [10, 2], "POW")
-    pickle.dump(cor, open("language_objects/cor.p", "w"))
-
-    #Breton 
-    bre = Language(6, None, num_only=True, date=(750, 800))
-    bre.first_three([1, 2, 3])
-    bre.successors(4, 10)
-    bre.add_rule(None, ["u", 10], "ADD")
-    bre.add_rule(None, ["u", 20], "ADD")
     
