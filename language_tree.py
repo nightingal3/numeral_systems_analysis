@@ -101,9 +101,6 @@ def make_tree(form, numexp, op, numeral_only=False):
 	return root
 
 def build_language(langcode, stored_info=None, save=True, prnt=False):
-	#f = open(os.getcwd() + "/complexities/langlist.txt", "r+") 	
-	#langcodes = f.read().split('\r\n')
-	#f.close()
         if stored_info:
                 with open(stored_info, "rb") as f:
                         lang_info = pickle.load(f)
@@ -117,8 +114,7 @@ def build_language(langcode, stored_info=None, save=True, prnt=False):
 	
 	strat_res, num_type, ulim = eval("langstrategy." + langcode)()
   	complexity = calc_complexity(strat_res)
-	for t in strat_res:
-	   print(calc_complexity_base(t))
+  	
 	if prnt:
 	    forest_disp(strat_res, langcode)
 	    

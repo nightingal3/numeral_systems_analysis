@@ -15,9 +15,7 @@ def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_rang
 	(mus, P_w_i_vec) = compute_P_w_i_match_modemap(mmap, numberline, nterm, term_num_map, mu_range, cc, w, nd)
 	mus = [i+1 for i in mus]	
 	F_i_w_numerator = compute_f_i_w_numerator(nnum, nterm, numberline, mus, cc, w)
-	#Bayesian listener
 	F_i_w_numerator = np.multiply(F_i_w_numerator, nd)
-	#
 	log_prob_L = np.zeros((1, nnum))
 	
 	for j in range(nterm):
@@ -38,12 +36,13 @@ def compute_cost_size_principle(upper_lim, need_prob):
 	length = len(need_prob)
 	unit_cost = [0] * length
 	denom = length - (upper_lim + 1) + 1
+	denom_normalize = 0
 	for i in range(upper_lim, length):
-		unit_cost[i] = -math.log(float(1)/float(denom), 2)
-                #unit_cost[i] = need_prob[i]
-	#	
-	unit_cost = np.asarray(unit_cost) * np.asarray(need_prob)
-	#
+                denom_normalize += float(need_prob[i])/float(denom)
+	for i in range(upper_lim, length):
+		unit_cost[i] = -math.log(float(need_prob[i])/float(denom)/float(denom_normalize), 2)
+        
+
 	c0 = np.sum(np.multiply(need_prob, unit_cost))
         return c0.sum()
 
@@ -55,12 +54,13 @@ def compute_cost_size_principle_arb(modemap, need_prob):
 	unique_cat = modemap_set
 	for i in range(len(unique_cat)):
 		inds = [j for j, val in enumerate(modemap) if modemap[j] == unique_cat[i]]
+		denom_normalize = 0
 		for ind in inds:
-			unit_cost[ind] = -math.log(float(1)/float(len(inds)), 2)
-                        #unit_cost[ind] = need_prob[ind]
-	#
-        unit_cost = np.asarray(unit_cost) * np.asarray(need_prob)
-        #
+                        denom_normalize += float(need_prob[ind])/float(len(inds))
+		for ind in inds:
+			unit_cost[ind] = -math.log(float(need_prob[ind])/float(len(inds)/float(denom_normalize)), 2)
+                       
+
 	return sum(np.multiply(need_prob, unit_cost))
 			
 

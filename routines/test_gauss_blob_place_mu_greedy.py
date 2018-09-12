@@ -32,9 +32,7 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
 					if flag:
 					
 						comp_perm.extend([comp_perm_t, comp_perm_ns_t])
-						#comp_perm.extend(comp_perm_ns_t)
 						ccost_perm.extend([ccost_perm_t, ccost_perm_ns_t])
-						#ccost_perm.extend(ccost_perm_ns_t)
 						curr_diff = abs(cost_prev - ccost_perm_t)
 						cost_prev = ccost_perm_t
 						mus = mus_propose
@@ -46,9 +44,8 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
 
 def compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange):
 	F_i_w_numerator = compute_f_i_w_numerator(nnum, nterm, numberline, mus, c, w)
-	#Bayesian listener
 	F_i_w_numerator = np.multiply(F_i_w_numerator, need_probs)
-	#
+	
 	term_num_map = np.zeros((nterm, nnum))
 	maxind = find(F_i_w_numerator, np.amax(F_i_w_numerator, 0), axis=1)
 	maxmaxind = find(maxind, max(maxind))
@@ -132,8 +129,7 @@ def main():
 	need_probs = open("../data/need_probs/needprobs_eng_fit.csv", "r").read().split("\r\n")[:-1]
 	need_probs = [float(i) for i in need_probs]
 	print(test_gauss_blob_place_mu_greedy(100, 2, [i for i in range(1, 101)], [i for i in range(1, 101)], 2.2810, 0.31, need_probs, 100, -1, [1, 2, 3]))
- 	#print(compute_cost_comp(100, 2, [ i for i in range(1, 101)], [5, 5], 2.2810, 0.31, need_probs, [1, 2, 3]))
-	#print(find([1, 2, 3], 3))
+ 	
 
 
 if __name__ == "__main__":

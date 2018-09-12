@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 import math
-#from routines import compute_P_w_i_correct_subitized
 from routines import compute_P_w_i_bias_correct_subitized
 
 def show_munduruku_fit(percent_file, terms_file, term_interp_file):
@@ -46,25 +45,15 @@ def show_munduruku_fit(percent_file, terms_file, term_interp_file):
 	P_w_i_opt = None
 	min_mse = float("inf")
 	mu_opt = None
-       	print(n_placements) 
 	for i in range(n_placements):
 		mus = mu_placements[i, :]
-		#print(mu_placements.shape)	
-		#print(mus.shape)
-		#print(total_mass)
-		#print(total_mass.shape)
-		#print(nnum, ncat, mus, c, w, total_mass, subrange, bias)
 		P_w_i = compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subrange, bias)
-		#print(nnum, ncat, mus, c, w, total_mas, subrange, bias)
 		mse_curr = np.mean(np.mean((P_w_i[:, :percent.shape[1]] - percent) ** 2, axis=1))
-		#print(mse_curr)
 		if mse_curr < min_mse:
 			min_mse = mse_curr
 			P_w_i_opt = P_w_i
 			mu_opt = mus
 
-	#print(P_w_i_opt)
-	print(min_mse)
 	for row in P_w_i_opt:
 		ax_model.plot(numberline, row, next(colors)) 
 

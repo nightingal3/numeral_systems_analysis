@@ -28,9 +28,9 @@ def aggregate_complexities():
 
 	return info
 
-def aggregate_communicative_costs(need_probs, lang_info):
-	"""lang_info should be a dict organized as {lang:(comp, num_type)}
-	* fix this mess later lol"""
+def aggregate_communicative_costs(need_probs, lang_info, dict_name="attested.p"):
+	"""lang_info should be a dict organized as {lang:(comp, num_type)}"""
+
 	langs = lang_info.keys()
 	complexities = [i[1][0] for i in lang_info.items()]
 	lang_by_category = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []}
@@ -57,7 +57,7 @@ def aggregate_communicative_costs(need_probs, lang_info):
 	for lang in costs: #return as (complexity, cost, lang_type)
 		ret[lang] = (lang_info[lang][0], costs[lang], lang_info[lang][1])
 
-	pickle.dump(ret, open("attested.p", "wb"))
+	pickle.dump(ret, open(dict_name, "wb"))
 	
 	return ret
 
@@ -67,15 +67,15 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
                 try:
                         comp_rand = pickle.load(open(stored_data_dir + "/comp_rand.p", "rb"))
                         cost_rand = pickle.load(open(stored_data_dir + "/cost_rand.p", "rb"))
-			compfenew = pickle.load(open(stored_data_dir + "/compfenew.p", "rb"))
-			costfenew = pickle.load(open(stored_data_dir + "/costfenew.p", "rb"))
+			            compfenew = pickle.load(open(stored_data_dir + "/compfenew.p", "rb"))
+			            costfenew = pickle.load(open(stored_data_dir + "/costfenew.p", "rb"))
                         compfe1new = pickle.load(open(stored_data_dir + "/compfe1new.p", "rb"))
                         costfe1new = pickle.load(open(stored_data_dir + "/costfe1new.p", "rb"))
                         base_n_complexity = pickle.load(open(stored_data_dir + "/base_n_complexity.p", "rb"))
 
                         try:
-                                #close(stored_data_dir + "/comp_rand.p")
-                                #close(stored_data_dir + "/cost_rand.p")
+                                close(stored_data_dir + "/comp_rand.p")
+                                close(stored_data_dir + "/cost_rand.p")
                                 close(stored_data_dir + "/compfe1new.p")
                                 close(stored_data_dir + "/costfe1new.p")
                                 close(stored_data_dir + "/base_n_complexity.p")
@@ -155,18 +155,17 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
                         os.mkdir("hyp_lang_data")
                 pickle.dump(cost_rand, open("hyp_lang_data/cost_rand.p", "wb"))
                 pickle.dump(comp_rand, open("hyp_lang_data/comp_rand.p", "wb"))
-		pickle.dump(compfenew, open("hyp_lang_data/compfenew.p", "wb"))
-		pickle.dump(costfenew, open("hyp_lang_data/costfenew.p", "wb"))
+		        pickle.dump(compfenew, open("hyp_lang_data/compfenew.p", "wb"))
+		        pickle.dump(costfenew, open("hyp_lang_data/costfenew.p", "wb"))
                 pickle.dump(compfe1new, open("hyp_lang_data/compfe1new.p", "wb"))
                 pickle.dump(costfe1new, open("hyp_lang_data/costfe1new.p", "wb"))
                 pickle.dump(base_n_complexity, open("hyp_lang_data/base_n_complexity.p", "wb"))
 
-
 	return comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity
 			
 def plot_cost_vs_complexity(lang_info, hyp_lang_info):
-	#attested languages
 
+	#attested languages
 	colorscheme = {1: "green", 6: "blue", 0: "red"}
 	fig, ax = plt.subplots()
 	offsets = {"war": (3, 0.025), "prh": (5, 0.05), "goo": (5, 0.025), "ain": (0, 0.05), "geo": (0, 0.05)} #sadly must be done
@@ -188,13 +187,18 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
 	comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity = hyp_lang_info
 	comp_rand_new = []
 	cost_rand_new = []
+	minmin = 999
+	maxmax = 0
 	for n in range(len(comp_rand)):
 		minv = min(cost_rand[n])
 		maxv = max(cost_rand[n])
+		if minv < minmin:
+                        minmin = minv
+		if maxv > maxmax:
+                        maxmax = maxv
 		if minv is not None and maxv is not None:
 			comp_rand_new.extend([comp_rand[n], comp_rand[n]])
 			cost_rand_new.extend([minv, maxv])
-                        
 
 	assert len(comp_rand_new) == len(cost_rand_new)
 	compfenew.extend(compfe1new)
@@ -202,7 +206,6 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
         exact_points = np.transpose(np.array((compfenew, costfenew)))
 	approx_points = np.transpose(np.array((comp_rand_new, cost_rand_new)))
 	
-
 	hull_exact = ConvexHull(exact_points)
 	hull_approx = ConvexHull(approx_points)
 	for simplex in hull_exact.simplices:
@@ -210,14 +213,12 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
 	for simplex in hull_approx.simplices:
 		plt.plot(approx_points[simplex, 0], approx_points[simplex, 1], color="#676768")
 	plt.fill(exact_points[hull_exact.vertices, 0], exact_points[hull_exact.vertices, 1], alpha=0.3, color="#CDCFD3")
-	#plt.scatter(compfenew, costfenew, color="#CDCFD3", s=2)
 	plt.fill(approx_points[hull_approx.vertices, 0], approx_points[hull_approx.vertices, 1], alpha=0.3, color="#676768")
-	#plt.scatter(comp_rand_new, cost_rand_new, color="#676768", s=2)
-	
+
 	plt.plot([base_n_complexity[0], base_n_complexity[1]], [0, 0])
 	plt.xlim(xmax=200)
-	plt.ylim(ymax=4)
-	plt.savefig("cvc.png", dpi=1000)
+	plt.ylim(ymax=2)
+	plt.savefig("cvc_v2.png", dpi=1000)
 	plt.gcf().clear()
 	return	
 
@@ -248,8 +249,9 @@ def main():
 	c = aggregate_complexities()
 	f = open("data/need_probs/needprobs_eng_fit.csv")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
+	aggregate_communicative_costs(need_probs, c, "attested_bayesian.p")
 	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs, stored_data_dir="hyp_lang_data")
-        f1 = open("attested.p", "rb")
+        f1 = open("attested_bayesian.p", "rb")
         x = pickle.load(f1)
 	x["eng"] = (126, 0, 6)
 	x["mnd"] = (92, 0, 6)

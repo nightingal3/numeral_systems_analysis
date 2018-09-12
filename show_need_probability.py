@@ -10,7 +10,7 @@ def plot_need_probability(filepath, filepath_fit):
 	f1 = open(filepath_fit, "r")
 	numberline = []
 	numberline.extend(range(1, 101))
-	#do some processing (do this with pandas later bc messy
+	
 	raw = f.readlines()
 	fit = f1.readlines()
 	raw_stripped = np.array([s.strip() for s in raw])

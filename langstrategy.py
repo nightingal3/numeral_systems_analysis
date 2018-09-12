@@ -435,21 +435,6 @@ if __name__ == "__main__":
     #f = mrt()
     #forest_disp(f, "mrt")
                                   
-    #Old Irish
-    sga = Language(6, None, num_only=True, date=750)
-    sga.first_three([1, 2, 3]) 
-    sga.successors(4, 10)
-    sga.add_rule(None, ["u", 10], "ADD")
-    sga.add_rule(None,  ["u", 20, "v"], "MTA")
-    sga.add_rule(None, ["u", "base"], "MUL")
-    sga.add_rule(None, ["u", 10, "v"], "MTA")
-    sga.add_rule(None, [10, 2], "POW")
-    if not os.path.exists("language_objects"):
-	os.makedirs("language_objects")
-    pickle.dump(sga, open("language_objects/sga.p", "w"))
-   
-    #Ainu
-    ain = Language(4, None, num_only=False)
-    ain.first_three(["sine", "tu", "re", "ine", "asikne"])
+
 
     
