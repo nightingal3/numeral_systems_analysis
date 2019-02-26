@@ -17,6 +17,8 @@ import pickle
 import os
 
 def aggregate_complexities():
+        """ Aggregates the complexities for attested languages."""
+        
 	info = {}
 	
 	#assume naming convention is respected...	
@@ -29,12 +31,13 @@ def aggregate_complexities():
 	return info
 
 def aggregate_communicative_costs(need_probs, lang_info, dict_name="attested.p"):
-	"""lang_info should be a dict organized as {lang:(comp, num_type)}"""
+	""" Aggregates the communicative costs for attested languages.
+        lang_info should be a dict organized as {lang:(comp, num_type)}"""
 
 	langs = lang_info.keys()
 	complexities = [i[1][0] for i in lang_info.items()]
 	lang_by_category = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []}
-	term = {"prh": ["hoi_1", "hoi_2", "aibaagi"], "war": ["xica pe", "dois"], "goo": ["yoowarni", "garndiwiddidi", "ngarloodoo", "marla"]} #get rid of hardcoding here
+	term = {"prh": ["hoi_1", "hoi_2", "aibaagi"], "war": ["xica pe", "dois"], "goo": ["yoowarni", "garndiwiddidi", "ngarloodoo", "marla"]} 
 	num_term_pt = {"prh":[1, 2, 2, 2, 3, 3, 3, 3, 3, 3], "war": [1, 2], "goo": [1, 2, 3, 3, 4]}
 	end_category = {"prh": 0, "war": 1, "goo": 1}
 	numberline = [i for i in range(1, 101)]
@@ -63,12 +66,15 @@ def aggregate_communicative_costs(need_probs, lang_info, dict_name="attested.p")
 
 
 def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=None, write=True):
+        """ Generates hypothetically possible numeral systems (approximate and exact restricted)
+        Approximate systems are generated randomly, but only the most efficient and least efficient (for typical need distribution) restricted systems are generated.
+        """
         if stored_data_dir:
                 try:
                         comp_rand = pickle.load(open(stored_data_dir + "/comp_rand.p", "rb"))
                         cost_rand = pickle.load(open(stored_data_dir + "/cost_rand.p", "rb"))
-			            compfenew = pickle.load(open(stored_data_dir + "/compfenew.p", "rb"))
-			            costfenew = pickle.load(open(stored_data_dir + "/costfenew.p", "rb"))
+			compfenew = pickle.load(open(stored_data_dir + "/compfenew.p", "rb"))
+			costfenew = pickle.load(open(stored_data_dir + "/costfenew.p", "rb"))
                         compfe1new = pickle.load(open(stored_data_dir + "/compfe1new.p", "rb"))
                         costfe1new = pickle.load(open(stored_data_dir + "/costfe1new.p", "rb"))
                         base_n_complexity = pickle.load(open(stored_data_dir + "/base_n_complexity.p", "rb"))
@@ -155,8 +161,8 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
                         os.mkdir("hyp_lang_data")
                 pickle.dump(cost_rand, open("hyp_lang_data/cost_rand.p", "wb"))
                 pickle.dump(comp_rand, open("hyp_lang_data/comp_rand.p", "wb"))
-		        pickle.dump(compfenew, open("hyp_lang_data/compfenew.p", "wb"))
-		        pickle.dump(costfenew, open("hyp_lang_data/costfenew.p", "wb"))
+		pickle.dump(compfenew, open("hyp_lang_data/compfenew.p", "wb"))
+		pickle.dump(costfenew, open("hyp_lang_data/costfenew.p", "wb"))
                 pickle.dump(compfe1new, open("hyp_lang_data/compfe1new.p", "wb"))
                 pickle.dump(costfe1new, open("hyp_lang_data/costfe1new.p", "wb"))
                 pickle.dump(base_n_complexity, open("hyp_lang_data/base_n_complexity.p", "wb"))
@@ -164,6 +170,8 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 	return comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity
 			
 def plot_cost_vs_complexity(lang_info, hyp_lang_info):
+        """ Plots cost against complexity for both attested and hypothetical systems.
+        The hypothetical systems will be plotted as a convex hull and not as individual points."""
 
 	#attested languages
 	colorscheme = {1: "green", 6: "blue", 0: "red"}
@@ -224,6 +232,7 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info):
 
 
 def reconfig_comp_cost(comp_m, cost_m):
+        """ """
 	unique = find_unique(comp_m[0])
 	for i in range(1, len(comp_m)):
                 unique.extend(comp_m[i])
@@ -241,7 +250,8 @@ def reconfig_comp_cost(comp_m, cost_m):
 
 		zinds = find(cost[i], float("inf"))
 		cost[i] = [val for index, val in enumerate(cost[i]) if index not in zinds]
-
+        print(unique)
+        print(cost)
 	return unique, cost
 
 
@@ -250,7 +260,7 @@ def main():
 	f = open("data/need_probs/needprobs_eng_fit.csv")
 	need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
 	aggregate_communicative_costs(need_probs, c, "attested_bayesian.p")
-	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs, stored_data_dir="hyp_lang_data")
+	y = generate_hypothetical_systems([i for i in range(1, 101)], 2.28, 0.31, need_probs)
         f1 = open("attested_bayesian.p", "rb")
         x = pickle.load(f1)
 	x["eng"] = (126, 0, 6)
