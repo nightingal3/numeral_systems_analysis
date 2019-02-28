@@ -17,7 +17,7 @@ from prettytable import PrettyTable
 
 from routines.find import *
 from routines.plotting import * 
-from config import font_sizes, need_probs, terms, attested_order, alternate_order
+from config import numberline, font_sizes, need_probs, terms, attested_order, alternate_order
 
 def generate_attested_and_alternate(filename):
 	#given a file containing terms in a range, generate the attested and reverse and return in same format as read_file
@@ -42,14 +42,36 @@ def calc_info_trajectory(df, need_prob, langname, maxval, shuffle, log_base, **o
         random.shuffle(need_prob)
 
                 
-    curr_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
-    irregulars = {}	
+    terms_dict = pd.Series(df.Number.values, index=df.Reading).to_dict()
     #~~~~Special language spelling handling~~~~
-    curr_dict, separator = special_language_handling(irregulars, {}, langname)
-        
-    inv_dict = {val: key for key, val in curr_dict.items() if key not in irregulars}
-    alt_dict = {"-".join(key.split("-")[::-1]): val for key, val in curr_dict.items()}
+    irregulars = get_irregular_prefixes(langname)
+    terms_dict.update(irregulars)        
+
+    inv_dict = {val: key for key, val in terms_dict.items()}
+    alt_dict = {"-".join(key.split("-")[::-1]): val for key, val in terms_dict.items()}
        
+    if langname[:3] == "eng":
+        alt_dict["teen-eight"] = 18
+        #teen_endings = ["-thir", "-fif", "-eigh"]
+        #for key in irregulars:
+            #for teen in teen_endings:
+                #hund_teen = key + teen
+                #terms_dict[hund_teen] = terms_dict[key + teen + "-teen"]
+    elif langname == "spa":
+        alt_dict["uno-y"] = 1
+        alt_dict["dos-y"] = 2
+        alt_dict["tres-y"] = 3
+        alt_dict["cuatro-y"] = 4
+        alt_dict["cinco-y"] = 5
+        alt_dict["seis-y"] = 6
+        alt_dict["siete-y"] = 7
+        alt_dict["ocho-y"] = 8
+        alt_dict["nueve-y"] = 9
+    elif langname == "fre":
+        alt_dict["un-et"] = 1
+        alt_dict["onze-et"] = 11
+        alt_dict["vingts"] = 20
+
     inv_alt_dict = {val: key for key, val in alt_dict.items()}
     entropies = [val * math.log(1/float(val), log_base) for val in need_prob] 
     info_traj_dict = {}
@@ -57,26 +79,26 @@ def calc_info_trajectory(df, need_prob, langname, maxval, shuffle, log_base, **o
 
     for name, opt in opts.items():
         if name[-3:] == "alt":
-            curr_tmp = curr_dict
-            curr_dict = alt_dict
+            curr_tmp = terms_dict
+            terms_dict = alt_dict
             inv_tmp = inv_dict
             inv_dict = inv_alt_dict
             alt_first = True
 
         elif alt_first:
-            curr_dict = curr_tmp
+            terms_dict = curr_tmp
             inv_dict = inv_tmp
 			
 	
         info_traj_dict[name] = {}
 
-        for i in range(len(number)):
-            curr_num = number[i]
+        for i in range(len(numberline)):
+            curr_num = numberline[i]
             phrase = opt[i]
             selected_vals = []
-            base_H = math.log(1/need_prob[curr_num - 1], log_base)
-            H_seq = [base_H]
-			
+            base_surprisal = math.log(1/need_prob[curr_num - 1], log_base)
+            surprisal_seq = [base_surprisal]
+            print(phrase)
             if len(phrase) == 1:
                 continue
             for j in range(len(phrase)):
@@ -97,71 +119,50 @@ def calc_info_trajectory(df, need_prob, langname, maxval, shuffle, log_base, **o
                     selected_vals = [i for i in range(1, maxval)]
 
 
-            H, selected_vals = calc_conditional_probability_reconst_cost(curr, curr_num, len(phrase), need_prob, curr_dict, inv_dict, langname, selected_vals, log_base)
-            H_seq.append(H)
+                surprisal, selected_vals = calc_conditional_probability_reconst_cost(curr, curr_num, len(phrase), need_prob, terms_dict, inv_dict, langname, selected_vals, log_base)
+                surprisal_seq.append(surprisal)
                                 
-
-            info_traj_dict[name][curr_num] = H_seq
+            info_traj_dict[name][curr_num] = surprisal_seq
 
     UID_dev = {}
     for name, opt in opts.items():
         UID_dev[name] = {}		
-        for opt in info_traj_dict:
-            for traj in info_traj_dict[opt]:
-                UID_dev[opt][traj] = calc_UID_deviation(info_traj_dict[opt][traj], len(inv_dict[traj].split("-")))
+    for opt in info_traj_dict:
+        for traj in info_traj_dict[opt]:
+            UID_dev[opt][traj] = calc_UID_deviation(info_traj_dict[opt][traj], len(inv_dict[traj].split("-")))
 
     return info_traj_dict, UID_dev
 
-def special_language_handling(irregular_forms_dict, alt_irregular_forms_dict, langname):
-    # Attested order handling
+def get_irregular_prefixes(langname):
+    irregulars = {}
     if langname[:3] == "eng":
-        irregular_forms_dict.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
-        separator = None
+        irregulars.update({"twen": 2, "thir": 3, "fif": 5, "eigh": 8, "teen": 10, "eleven": 11, "twelve": 12})
         if langname == "eng_1000":
-            irregulars = {"onehundred-and": 100, "twohundred-and": 200, "threehundred-and": 300, "fourhundred-and": 400, "fivehundred-and": 500, "sixhundred-and": 600, "sevenhundred-and": 700, "eighthundred-and": 800, "ninehundred-and": 900}
-            irregular_forms_dict.update(irregulars)
+            irregulars.update({"onehundred-and": 100, "twohundred-and": 200, "threehundred-and": 300, "fourhundred-and": 400, "fivehundred-and": 500, "sixhundred-and": 600, "sevenhundred-and": 700, "eighthundred-and": 800, "ninehundred-and": 900})
     elif langname == "ger":
-        irregular_forms_dict.update({"sech": 6, "sieb": 7, "einund": 1, "zweiund": 2, "dreiund": 3, "vierund": 4, "funfund": 5, "sechsund": 6, "siebenund": 7, "achtund": 8, "neunund": 9})
-        separator = None
+        irregulars.update({"sech": 6, "sieb": 7, "einund": 1, "zweiund": 2, "dreiund": 3, "vierund": 4, "funfund": 5, "sechsund": 6, "siebenund": 7, "achtund": 8, "neunund": 9})
     elif langname == "spa":
-        irregular_forms_dict.update({"dieci": 10, "treinta-y": 30, "cuarenta-y": 40, "cincuenta-y": 50, "sesenta-y": 60, "setenta-y": 70, "ochenta-y": 80, "noventa-y": 90})
-        separator = "y"
+        irregulars.update({"dieci": 10, "treinta-y": 30, "cuarenta-y": 40, "cincuenta-y": 50, "sesenta-y": 60, "setenta-y": 70, "ochenta-y": 80, "noventa-y": 90})
     elif langname == "ita":
-        irregular_forms_dict.update({"un": 1, "do": 2, "quattor": 4, "quin": 5, "se": 6, "dicia": 10,  "dici": 10, "vent": 20, "trent": 30, "quarant": 40, "cinquant": 50, "sessant": 60, "settant": 70, "ottant": 80, "novant": 90})
-        separator = None
+        irregulars.update({"un": 1, "do": 2, "quattor": 4, "quin": 5, "se": 6, "dicia": 10,  "dici": 10, "vent": 20, "trent": 30, "quarant": 40, "cinquant": 50, "sessant": 60, "settant": 70, "ottant": 80, "novant": 90})
     elif langname == "fre":
-        irregular_forms_dict.update({"vingt-et": 20, "trente-et": 30, "quarante-et": 40, "cinquante-et": 50, "soixante-et": 60})
-        separator = None
+        irregulars.update({"vingt-et": 20, "trente-et": 30, "quarante-et": 40, "cinquante-et": 50, "soixante-et": 60})
 
-    
-    yield irregular_forms_dict, separator
+    return irregulars 
 
-    #Alternate order handling
+def get_irregular_suffixes(langname):
+    irregulars = []
     if langname[:3] == "eng":
-        alt_irregular_forms_dict["teen-eight"] = 18
-        teen_endings = ["-thir", "-fif", "-eigh"]
-        for key in irregulars:
-            for teen in teen_endings:
-                hund_teen = key + teen
-                irregular_forms_dict[hund_teen] = irregular_forms_dict[key + teen + "-teen"]
-                        
-
-    if langname == "spa":
-            alt_irregular_forms_dict["uno-y"] = 1
-            alt_irregular_forms_dict["dos-y"] = 2
-            alt_irregular_forms_dict["tres-y"] = 3
-            alt_irregular_forms_dict["cuatro-y"] = 4
-            alt_irregular_forms_dict["cinco-y"] = 5
-            alt_irregular_forms_dict["seis-y"] = 6
-            alt_irregular_forms_dict["siete-y"] = 7
-            alt_irregular_forms_dict["ocho-y"] = 8
-            alt_irregular_forms_dict["nueve-y"] = 9
-    if langname == "fre":
-            alt_irregular_forms_dict["un-et"] = 1
-            alt_irregular_forms_dict["onze-et"] = 11
-            alt_irregular_forms_dict["vingts"] = 20
-
-    return alt_irregular_forms_dict
+                irregulars = ["twen", "thir", "fif"]
+    elif langname == "ger":
+            irregulars = ["zehn", "zwanzig", "dreisig", "vierzig", "funfzig", "sechzig", "siebzig", "achtzig", "neunzig"] #not technically irregular, only needed because I treated something like "einund" as one unit
+    elif langname == "spa":
+            irregulars = ["uno-y", "dos-y", "treinta-y", "cuatro-y", "cuarenta-y", "cinco-y", "cincuenta-y", "seis-y", "sesenta-y", "siete-y", "setenta-y", "ocho-y", "ochenta-y", "nueve-y", "noventa-y"]
+    elif langname == "ita":
+            irregulars = ["do", "quattor", "quin", "dici", "dicia"]
+    elif langname == "fre":
+            irregulars = ["vingt-et", "trente-et", "quarante-et", "cinquante-et", "soixante-et", "onze-et"]
+    return irregulars
 
 def calc_conditional_probability_reconst_cost(word, target, target_len, need_prob, num_dict, inv_num_dict, langname, numberline, log_base):
     if word[-4:] == "-and":
@@ -174,7 +175,7 @@ def calc_conditional_probability_reconst_cost(word, target, target_len, need_pro
             word_val = num_dict[word]
                 
     selected_vals = []
-    irregulars = get_irregular_words(langname)
+    irregulars = get_irregular_suffixes(langname)
                 
     for num in numberline:
         minlen = len(word)
@@ -201,25 +202,12 @@ def calc_conditional_probability_reconst_cost(word, target, target_len, need_pro
     need_prob = [val for i, val in enumerate(need_prob) if i + 1 in selected_vals]
     if sum(need_prob) == 0:
         print("Error: word '%s' does not refer to any number. Ensure all input words are correct." % word)
-        sys.exit(1);
+        sys.exit(1)
 
     P_target = need_prob[find(selected_vals, target)[0]]
     P_all = sum(need_prob)
 
     return math.log(float(P_all) / float(P_target), log_base), selected_vals
-        	
-def get_irregular_words(langname):
-    if langname[:3] == "eng":
-        irregulars = ["twen", "thir", "fif"]
-    elif langname == "ger":
-        irregulars = ["zehn", "zwanzig", "dreisig", "vierzig", "funfzig", "sechzig", "siebzig", "achtzig", "neunzig"] #not technically irregular, only needed because I treated something like "einund" as one unit
-    elif langname == "spa":
-        irregulars = ["uno-y", "dos-y", "treinta-y", "cuatro-y", "cuarenta-y", "cinco-y", "cincuenta-y", "seis-y", "sesenta-y", "siete-y", "setenta-y", "ocho-y", "ochenta-y", "nueve-y", "noventa-y"]
-    elif langname == "ita":
-        irregulars = ["do", "quattor", "quin", "dici", "dicia"]
-    elif langname == "fre":
-        irregulars = ["vingt-et", "trente-et", "quarante-et", "cinquante-et", "soixante-et", "onze-et"]
-    return irregulars
 
 def shuffle_test_2(times, df, need_prob, langname, maxval, real_11_19_mean, real_21_29_mean, hist, **opts):
         """hist_or_box: 1 for hist, 0 for box"""
@@ -312,6 +300,7 @@ def shuffle_test_2(times, df, need_prob, langname, maxval, real_11_19_mean, real
         plt.title("Range 21-29", fontsize=font_sizes["BIG_SIZE"])
         plt.xlabel("Mean difference in alternate and attested cumulative surprisal in range", fontsize=font_sizes["SMALL_SIZE"])
         plt.savefig("meandiff_new.png", fontsize=font_sizes["MEDIUM_SIZE"])
+        plt.gcf().clear()
         
         return avg_diff_mean_teens, avg_diff_mean_twenties
         
@@ -399,28 +388,30 @@ def shuffle_test(times, df, need_prob, langname, maxval, **opts):
         return avg_diff_teens_2, sd_teens, avg_diff_twenties_2, sd_twenties
 
 def calc_UID_deviation(info_traj, phrase_len): 
-	total = 0
-	if phrase_len == 1:
-                return 0
+    print(info_traj)
+    print(phrase_len)
+    total = 0
+    if phrase_len == 1:
+        return 0
         
-	for i in range(1, phrase_len + 1):
-                        total += abs(float(info_traj[i - 1] - info_traj[i])/info_traj[0] - (1/float(phrase_len)))
+    for i in range(1, phrase_len + 1):
+        total += abs(float(info_traj[i - 1] - info_traj[i])/info_traj[0] - (1/float(phrase_len)))
                         
-	if phrase_len > 2:
-                total *= float(phrase_len)/(2 * (phrase_len - 1)) 
+    if phrase_len > 2:
+        total *= float(phrase_len)/(2 * (phrase_len - 1)) 
 		
-	return total
+    return total
 
 def calc_cumulative_surprisal(**info_traj):
-	area = {}
-	for name, opt in info_traj.items():
-		area[name] = {}
-		for traj in info_traj[name]:
-                        area[name][traj] = 0
-                        for i in range(len(info_traj[name][traj])):
-                                area[name][traj] += info_traj[name][traj][i]
+    area = {}
+    for name, _ in info_traj.items():
+        area[name] = {}
+        for traj in info_traj[name]:
+            area[name][traj] = 0
+            for i in range(len(info_traj[name][traj])):
+                area[name][traj] += info_traj[name][traj][i]
 		
-	return area			
+    return area			
 
 def normalize_freq(freqs, upper_lim):
 	total = 0
@@ -436,50 +427,48 @@ def normalize_freq(freqs, upper_lim):
 	return new
 
 def tabulate_metric_accuracy(dict, langname):
-        langname_alt = langname + "_alt"
-        num_correct_in_range = {}
-        num_total_in_range = {}
-        for num in range(11, 99):
-                if num % 10 == 0:
-                        continue
-                if num not in dict[langname] or num not in dict[langname_alt]:
-                        continue
-                if dict[langname_alt][num] > dict[langname][num]:
-                        if math.floor(num / 10) * 10 not in num_correct_in_range:
-                                num_correct_in_range[math.floor(num / 10) * 10] = 1
-                        else:
-                                num_correct_in_range[math.floor(num / 10) * 10] += 1
-                if math.floor(num / 10) * 10 not in num_total_in_range:
-                        num_total_in_range[math.floor(num / 10) * 10] = 1
-                else:
-                        num_total_in_range[math.floor(num / 10) * 10] += 1
-
-        print(num_correct_in_range)
-        return num_correct_in_range, num_total_in_range
+    langname_alt = langname + "_alt"
+    num_correct_in_range = {}
+    num_total_in_range = {}
+    for num in range(11, 99):
+        if num % 10 == 0:
+            continue
+        if num not in dict[langname] or num not in dict[langname_alt]:
+            continue
+        if dict[langname_alt][num] > dict[langname][num]:
+            if math.floor(num / 10) * 10 not in num_correct_in_range:
+                num_correct_in_range[math.floor(num / 10) * 10] = 1
+            else:
+                num_correct_in_range[math.floor(num / 10) * 10] += 1
+        if math.floor(num / 10) * 10 not in num_total_in_range:
+            num_total_in_range[math.floor(num / 10) * 10] = 1
+        else:
+            num_total_in_range[math.floor(num / 10) * 10] += 1
+    print(num_correct_in_range)
+    return num_correct_in_range, num_total_in_range
 
 def tabulate_surprisal_below_UID(info_trajs, langname):
-        langname_alt = langname + "_alt"
-        attested_below_UID = {}
-        alternate_below_UID = {}
-        for num in range(11, 99):
-                if num % 10 == 0:
-                        continue
-                if num not in info_trajs[langname] or num not in info_trajs[langname_alt]:
-                        continue
-                num_range = math.floor(num / 10) * 10
-                print(num_range)
-                surprisal_midpoint = info_trajs[langname][num][0] * 0.5
-                if info_trajs[langname][num][1] < surprisal_midpoint:
-                        if num_range in attested_below_UID:
-                                attested_below_UID[num_range] += 1
-                        else:
-                                attested_below_UID[num_range] = 1
-                if info_trajs[langname_alt][num][1] < surprisal_midpoint:
-                        if num_range in alternate_below_UID:
-                                alternate_below_UID[num_range] += 1
-                        else:
-                                alternate_below_UID[num_range] = 1
-        return attested_below_UID, alternate_below_UID
+    langname_alt = langname + "_alt"
+    attested_below_UID = {}
+    alternate_below_UID = {}
+    for num in range(11, 99):
+            if num % 10 == 0:
+                    continue
+            if num not in info_trajs[langname] or num not in info_trajs[langname_alt]:
+                    continue
+            num_range = math.floor(num / 10) * 10
+            surprisal_midpoint = info_trajs[langname][num][0] * 0.5
+            if info_trajs[langname][num][1] < surprisal_midpoint:
+                    if num_range in attested_below_UID:
+                            attested_below_UID[num_range] += 1
+                    else:
+                            attested_below_UID[num_range] = 1
+            if info_trajs[langname_alt][num][1] < surprisal_midpoint:
+                    if num_range in alternate_below_UID:
+                            alternate_below_UID[num_range] += 1
+                    else:
+                            alternate_below_UID[num_range] = 1
+    return attested_below_UID, alternate_below_UID
                 
 def print_accuracy_in_range(correct_dict, total_dict):
         ranges = sorted(correct_dict.keys())
@@ -504,11 +493,12 @@ if __name__ == "__main__":
     )
     ### Settings ###
 
-    selected_lang = "English" # Change language here
+    selected_lang = "Template" # Change language here
     selected_langname = langnames[selected_lang] 
+    want_shuffle_test = 0 # Whether or not to perform a shuffle/permutation test
     num_iterations_shuffle_test = 100000 # Number of trials for shuffle/permutation test
     want_hist = 0 # Whether to plot a histogram(0) or box-plot(1) for shuffle/permutation test
-    tabulate_accuracy = 0 # Whether or not to print accuracy metrics for UID/RIG
+    tabulate_accuracy = 1 # Whether or not to print accuracy metrics for UID/RIG
 
     ###
 
@@ -524,25 +514,24 @@ if __name__ == "__main__":
    
     info_trajs, UID_dev = calc_info_trajectory(selected_terms, selected_need_probs, selected_langname, 100, False, 2, uni_alt=selected_alternate_order, uni=selected_attested_order)
                 
-    area = calc_cumulative_surprisal(uni_alt=info_trajs["uni_alt"], uni=info_trajs["uni"])
-
+    area = calc_cumulative_surprisal(uni_alt=info_trajs[selected_langname_alt], uni=info_trajs[selected_langname])
+    
     UID_dict = UID_dev[selected_langname]
     UID_dict_alt = UID_dev[selected_langname_alt]
 
 
     plot_mini(info_trajs, selected_langname, ext=".png")
-    plot_area(area, "Template", 100)
+    plot_area(area, selected_lang, 100)
     plot_uid(UID_dict, UID_dict_alt, selected_langname)
 
-    if selected_langname == "uni":
+    if selected_langname == "uni" and want_shuffle_test:
         # Just because I didn't calculate the empirical differences (11-19) and (21-29) for all languages
-        shuffle_test_2(num_iterations_shuffle_test, selected_terms, selected_need_probs, selected_langname, 100, 0.00476, 1.74, hist=want_hist, mand_alt=selected_alternate_order, mand=selected_attested_order)
+        shuffle_test_2(num_iterations_shuffle_test, selected_terms, selected_need_probs, selected_langname, 100, 0.00476, 1.74, hist=want_hist, uni_alt=selected_alternate_order, uni=selected_attested_order)
 
     if tabulate_accuracy:
         UID_corr, UID_total = tabulate_metric_accuracy(UID_dev, selected_langname)
         RIG_corr, RIG_total = tabulate_metric_accuracy(area, selected_langname)
         print_accuracy_in_range(UID_corr, UID_total)
         print_accuracy_in_range(RIG_corr, RIG_total)
-        print(tabulate_surprisal_below_UID(info_trajs, selected_langname))
 
     print("DONE!!!!!")
