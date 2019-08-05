@@ -7,8 +7,7 @@ from functools import lru_cache
 def compute_cost_size_principle(upper_lim, need_prob):
     length = len(need_prob)
     unit_cost = [0] * length
-    print(upper_lim)
-    print(need_prob)
+    
     denom = length - (upper_lim + 1) + 1
     for i in range(upper_lim, length):
         #unit_cost[i] = -math.log(float(1)/float(denom), 2)

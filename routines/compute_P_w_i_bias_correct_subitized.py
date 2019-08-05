@@ -16,7 +16,6 @@ def compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subr
 
     # Assume always correct in subitizing range
     for i in range(len(subrange)):
-        #print(f_i_w[i, :])
         f_i_w[i, :] = np.zeros((1, f_i_w.shape[1]))
         f_i_w[i, i] = 1
 

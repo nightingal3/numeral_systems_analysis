@@ -21,8 +21,6 @@ if __name__ == "__main__":
     numberline = [i for i in range(length + 1)]
     ideal_rig = ideal_rig(2, 100)
     ideal_uid = ideal_uid(2, 100)
-    print(ideal_rig)
-    print(ideal_uid)
     plt.figure(dpi=img_dpi)
     plt.xlabel("Number of constituents", size=20)
     plt.xticks(numberline, size=18)

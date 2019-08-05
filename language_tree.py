@@ -114,8 +114,6 @@ def build_language(langcode, stored_info=None, save=True, prnt=False):
     strat_res, num_type, ulim = eval("langstrategy." + langcode)()
     complexity = calc_complexity(strat_res)
 
-    print(strat_res)
-
     if prnt:
         forest_disp(strat_res, langcode)
 

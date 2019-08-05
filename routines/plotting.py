@@ -227,7 +227,6 @@ def plot_bounding_box(ax, bound_range, area_dict, color="#d8ac31", linewidth=3):
             if (num >= bound_range[0] and num <= bound_range[1]) and area_dict[key][num] > max_height_in_bounds:
                 max_height_in_bounds = area_dict[key][num]
     max_height_in_bounds = round_up_to_nearest(5, max_height_in_bounds)
-    print(max_height_in_bounds)
     ax.add_patch(Rectangle((0, bound_range[0]), (bound_range[1] - bound_range[0]),
                            max_height_in_bounds, fill=None, color=color, linewidth=linewidth))
 
