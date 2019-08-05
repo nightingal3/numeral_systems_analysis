@@ -20,34 +20,33 @@ def find(iterable, cond, axis=0):
                 if (isinstance(cond, np.ndarray) and cond.ndim == 1) or isinstance(cond, list):
                     res = []
                     for i in range(iterable.shape[axis]):
-                        # only supports 2d arrays for now
-                        for j in range(iterable.shape[abs(axis - 1)]):
+                        for j in range(iterable.shape[abs(axis - 1)]): #only supports 2d arrays for now
                             if axis == 1:
                                 if iterable[j, i] == cond[i]:
                                     res.append(j)
                                     break
-
+										
                             elif axis == 0:
                                 if iterable[i, j] == cond[i]:
                                     res.append(j)
                                     break
                     return res
-
+					
                 elif cond.ndim == 0:
-                    return [index for index, elem in np.ndenumerate(iterable) if elem == cond]
+                    return 	[index for index, elem in np.ndenumerate(iterable) if elem == cond]
                 else:
                     raise NotImplementedError
 
 
-def find_diff(X, Y):
-    # to match matlab implementation
+def find_diff(X, Y):	
+    #to match matlab implementation
     return sorted(set(X) - set(Y))
-
 
 def find_unique(X):
     return sorted(set(X))
 
 
 if __name__ == "__main__":
+    #print(find(compute_f_i_w_numerator(100, 3, [i for i in range(1, 101)], [1, 74, 75], 2.2810, 0.31), ))
     print(find(np.arange(18).reshape(3, 6), [0, 13, 8, 3, 4, 11], axis=1))
     print(find(np.arange(18).reshape(3, 6), [2, 10, 13], axis=0))
