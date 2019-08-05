@@ -5,7 +5,7 @@ def compute_cost_approx(term, numberline, num_term_pt, end_category, nd, mu_rang
 	cc = 1 / (math.sqrt(2) * w)
 	nnum = len(numberline)
 	term_num_map, nterms = get_term_num_matrix(term,nnum,num_term_pt,end_category,numberline)
-
+	print(term_num_map)
 	#Find optimal mus
 	a, mmap = max(term_num_map), np.indmax(term_num_map)
 	

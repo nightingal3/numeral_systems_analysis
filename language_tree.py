@@ -172,7 +172,6 @@ if __name__ == "__main__":
     #t = make_tree(["fsdf", "dsfsd", "-", "dsifhsd", "sfdf"], ["fsdf-dsfsd", "dsifhsd-sfdf"], "ADD")
     #print(disp(t, "trial_multi"))
     #print(build_language("acg", prnt=True))
-    #assert False
 
     """f = open("complexities/selected.txt", "r")
     selected_25 = f.read().split('\r\n')

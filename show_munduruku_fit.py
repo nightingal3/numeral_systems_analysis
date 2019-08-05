@@ -55,10 +55,8 @@ def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subiti
         mus = mu_placements[i, :]
         if model == "subitize":
             P_w_i = compute_P_w_i_bias_correct_subitized(
-                nnum, ncat, mus, c, w, total_mass, subrange, bias)
-            print("mus: ", mu_placements)
-            print(P_w_i)
-            assert False
+                nnum, ncat, mus, c, w, total_mass, subrange, bias
+			)
         elif model == "no_subitize":
             P_w_i = compute_P_w_i_bias_correct(
                 nnum, ncat, mus, c, w, total_mass, bias)
@@ -107,7 +105,7 @@ def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subiti
         lgd, lab_a, lab_b), bbox_inches="tight")
     plt.savefig("mund_comp_nosub.eps", dpi=1000, bbox_extra_artists=(
         lgd, lab_a, lab_b), bbox_inches="tight")
-    return
+    
 
 
 if __name__ == "__main__":

@@ -48,6 +48,5 @@ def gen_fitted_need_probs(filepath, coefficient, exp):
 
 if __name__ == "__main__":
     #gen_fitted_need_probs("data/need_probs/needprobs_eng_fit_1.csv", 0.8, -2.02)
-    #assert False
     plot_need_probability("data/need_probs/need_probs.csv",
                           "data/need_probs/needprobs_eng_fit_1.csv")

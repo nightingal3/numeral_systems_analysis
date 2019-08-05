@@ -118,7 +118,6 @@ def compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subr
 
     # multiply by prior
     print(f_i_w)
-    assert False
     P_i_w = np.multiply(f_i_w, bias_mat)
     norm = P_i_w.sum(axis=0)
     # normalize
