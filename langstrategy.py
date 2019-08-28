@@ -499,8 +499,12 @@ def first_three(forest, terms, num_only=False):
     return forest
 
 
-def successors(forest, terms, start, end):
+def successors(forest, terms, start, end, exclude_beginning=True):
     for c in range(start, end):
-        forest.append(language_tree.make_tree(terms[c], c+1, "SUC"))
+        term_index = c
+        if exclude_beginning:
+            term_index = c - start
+        forest.append(language_tree.make_tree(terms[term_index], c+1, "SUC"))
 
     return forest
+
