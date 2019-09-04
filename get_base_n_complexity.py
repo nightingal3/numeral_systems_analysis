@@ -42,7 +42,7 @@ def make_general_rules(base: int, ulim: int, forest: list):
     exp = 2
     i = base ** exp
     while i in range(base ** 2, ulim + 1):
-        forest.append(make_tree("B" + str(exp), [str(base), str(exp)], "POW"))
+        forest.append(make_tree("B", str(exp), [str(base), str(exp)], "POW"))
         exp += 1
         i = base ** exp
 
@@ -63,7 +63,7 @@ def plot_complexities(min_num: int, max_num: int, complexities: list, filename: 
     ax.spines["right"].set_visible(False)
     plt.plot([i for i in range(min_num, max_num)], complexities, color="#222222")
     plt.xlabel("Base", fontsize=14)
-plt.ylabel("Complexity", fontsize=14)
+    plt.ylabel("Complexity", fontsize=14)
     plt.xticks([i for i in range(0, max_num, 5)], fontsize=10)
     plt.savefig(filename + ".png")
     plt.savefig(filename + ".eps")
