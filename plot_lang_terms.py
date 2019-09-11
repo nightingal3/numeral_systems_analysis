@@ -10,28 +10,36 @@ import language_tree
 
 
 lang_term_bounds = {
-    "Approximate": [("Piraha", [0, 1, 2, 5, 15]), ("Gooniyandi", [0, 1, 2, 3, 5, 15])],
+    "Approximate": [("Piraha", [0, 1, 2, 5, 15]), ("Gooniyandi", [0, 1, 2, 3, 5, 7, 15])],
     "Exact": [("Achagua", [0, 1, 2, 3, 15]), ("Kayardild", [0, 1, 2, 3, 4, 5, 15]), ("Yidiny", [0, 1, 2, 3, 4, 5, 15]), ("Wichi", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15])],
     "Recursive": [("English", [i for i in range(0, 16)])]
 }
 
 
-ideal_bounds_approx = {
-    3: [0, 1, 2, 4, 15],
-    4: [0, 1, 2, 3, 5, 15],
-    5: [0, 1, 2, 3, 4, 6, 15],
+ideal_bounds_approx_steep = {
+    3: [0, 1, 2, 6, 15],
+    5: [0, 1, 2, 3, 4, 11, 15],
     6: [0, 1, 2, 3, 4, 6, 12, 15]
 }
 
+ideal_bounds_approx = {
+    3: [0, 1, 2, 6, 15],
+    5: [0, 1, 2, 3, 5, 11, 15],
+    6: [0, 1, 2, 3, 4, 6, 12, 15]
+}
+
+ideal_bounds_approx_flat = {
+    3: [0, 11, 15],
+    5: [0, 1, 5, 11, 15],
+    6: [0, 1, 4, 8, 12, 15]
+}
 
 def gen_ideal_bounds_exact(n): return [i for i in range(0, n + 1)] + [15]
+def gen_ideal_bounds_exact_flat(n): return [i for i in range(0, 15, int(round(100 / n)))] + [15]
+ideal_bounds_exact = {i: gen_ideal_bounds_exact(i) for i in range(3, 16)}
+ideal_bounds_exact_flat = {i: gen_ideal_bounds_exact_flat(i) for i in range(3, 16)}
 
-ideal_bounds_exact = {i: gen_ideal_bounds_exact(i) for i in range(1, 16)}
-
-optimal_flat = {}
-
-optimal_steep = {}
-
+ideal_bounds_exact_steep = ideal_bounds_exact
 
 def get_langterms():
     # assume naming convention is respected...
@@ -61,6 +69,7 @@ def plot_terms_gradient(term_maps):
         ax.axis("off")
 
     colors_per_term = { 
+        1: ["#e50012"],
         3: ["#e50012", "#750068", "#0500bf"],
         4: ["#e50012", "#9a004b", "#4f0085", "#0500bf"],
         5: ["#e50012", "#ad003d", "#750068", "#3d0093", "#0500bf"],
@@ -70,21 +79,23 @@ def plot_terms_gradient(term_maps):
         15: ["#e50012", "#d5001e", "#c5002a", "#b50037", "#a50043", "#a50037", "#95004f", "#85005c", "#750068", "#650074", "#550081", "#45008d", "#350099", "#2500a6", "#1500b2", "#0500bf"]
     }
 
+    offsets = {"Piraha": -0.4, "Gooniyandi": -0.7, "Achagua": -0.55, "Kayardild": -0.6, "Wichi": -0.35, "English": -0.45}
+
     bound_approx_systems = len(lang_term_bounds["Approximate"]) * 3
     bound_exact_systems = len(lang_term_bounds["Exact"]) * 3 
     bound_recursive_systems = len(lang_term_bounds["Recursive"]) * 3 
 
-    colorbar_gen = create_colorbar_generator(axes, colors_per_term, num_rows, num_cols)
-    offset = colorbar_gen(bound_approx_systems, lang_term_bounds["Approximate"], "Approximate", ideal_bounds_approx)
-    offset = colorbar_gen(bound_exact_systems + offset, lang_term_bounds["Exact"], "Exact", ideal_bounds_exact)
+    colorbar_gen = create_colorbar_generator(axes, colors_per_term, offsets, num_rows, num_cols)
+    offset = colorbar_gen(bound_approx_systems, lang_term_bounds["Approximate"], "Approximate", ideal_bounds_approx_flat)
+    offset = colorbar_gen(bound_exact_systems + offset, lang_term_bounds["Exact"], "Exact", ideal_bounds_exact_flat)
     colorbar_gen(bound_recursive_systems + offset, lang_term_bounds["Recursive"], "Recursive", {14:[i for i in range(1, 16)]})
-    plt.subplots_adjust(left=0.12,bottom=0.21,right=0.94,top=0.89,wspace=0.76,hspace=0.65)
-    plt.savefig("colormaps.png")
+    plt.subplots_adjust(left=0.13,bottom=0.21,right=0.94,top=0.89,wspace=0.76,hspace=0.65)
+    plt.savefig("colormaps_flat.png")
     plt.gcf().clear()
 
 
 ax_ind = 0
-def create_colorbar_generator(axes, colors, num_rows, num_cols):
+def create_colorbar_generator(axes, colors, text_offset, num_rows, num_cols):
     def next_group(upper_bound, langs, type, ideal_bounds):
         global ax_ind
         if ax_ind > num_rows * num_cols:
@@ -95,8 +106,9 @@ def create_colorbar_generator(axes, colors, num_rows, num_cols):
             name, attested_bounds = lang_term_bounds[type][i]
             num_terms = len(attested_bounds) - 2
             color_list = colors[num_terms]
-
-            plot_colorbar(attested_ax, color_list, attested_bounds, name)
+            attested_offset = text_offset[name] if name in text_offset else -0.4
+            
+            plot_colorbar(attested_ax, color_list, attested_bounds, name, attested_offset)
             plot_colorbar(ideal_ax, color_list, ideal_bounds[num_terms], "Optimal", x_offset = -0.5)
         ax_ind = round_up_to_nearest(upper_bound, num_rows) # Fill in whitespace
         return ax_ind
@@ -104,14 +116,21 @@ def create_colorbar_generator(axes, colors, num_rows, num_cols):
     return next_group
 
 def plot_colorbar(ax, colors, bounds, text, x_offset = -0.7, y_offset = 0.3):
-    # norm = matplotlib.colors.Normalize()
-    norm = matplotlib.colors.BoundaryNorm(boundaries=bounds, ncolors=len(bounds) - 2)
-    # normed_vals = list(norm(bounds))
+    norm = matplotlib.colors.BoundaryNorm(boundaries=bounds, ncolors=1)
+    if len(bounds) != 2:
+        norm = matplotlib.colors.BoundaryNorm(boundaries=bounds, ncolors=len(bounds) - 2)
+    
+    ax.tick_params(axis='both', which='minor', labelsize=5)
 
     cmap = matplotlib.colors.ListedColormap(colors)
-    colorbar = matplotlib.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation="horizontal", spacing="proportional", ticks=[1, 2, 3])
-    colorbar.set_ticks([0.1, 0.2, 0.3])
-    colorbar.set_ticklabels([1, 2, 3])
+    colorbar = matplotlib.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation="horizontal", spacing="proportional")
+
+    colorbar.set_ticks([i for i in range(0, 16, 5)])
+
+    if text != "Optimal":
+        ax.axis("on")
+        colorbar.set_ticklabels([i for i in range(0, 16, 5)])
+
     ax.text(x_offset, y_offset, text, fontsize=10)
 
 
@@ -119,4 +138,4 @@ def round_up_to_nearest(num_to_round, base):
     return int(math.ceil(float(num_to_round) / base) * base)
 
 if __name__ == "__main__":
-    plot_terms_gradient(lang_terms)
+    plot_terms_gradient(lang_term_bounds)
