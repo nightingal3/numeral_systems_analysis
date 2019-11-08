@@ -6,6 +6,7 @@ import inspect
 import pickle
 import langstrategy
 import sys
+import pdb
 
 
 def make_tree(form, numexp, op, numeral_only=False):
@@ -94,6 +95,37 @@ def make_tree(form, numexp, op, numeral_only=False):
             r_l_r_1 = Node(numexp[1], parent=r_l_r)
             r_r = Node("m3", display_name="m", parent=r_root)
             r_r_1 = Node(numexp[2], parent=r_r)
+
+    elif op == "MTA_LONG":
+        levels = len(form) - 2
+        base_tree = make_tree(form, numexp, "ADD", numeral_only)
+        base_l = base_tree.children[0]
+        base_r = base_tree.children[1]
+
+        base_l.parent = None
+        base_r.parent = None
+
+        prev_level_l = base_l
+        prev_level_r = base_r
+        for i in range(levels):
+            r_level = Node("+")
+            r_l = Node("*", parent=r_level)
+            r_1 = Node("m" + str(i) + "0", display_name="m", parent=r_l)
+            mult = Node(numexp[len(form) - 2 - i], parent=r_1)
+            r_2 = Node("m" + str(i) + "1", display_name="m", parent=r_l)
+            base = Node("B ^ " + str(len(form) - i), parent=r_2)
+
+            l_level = Node("-")
+            l_l = Node(form[len(form) - 2 - i], parent=l_level)
+
+            r_level.children = [r_l, prev_level_r]
+            l_level.children = [l_l, prev_level_l]
+
+            prev_level_l = l_level
+            prev_level_r = r_level
+        
+        root.children = [prev_level_l, prev_level_r]
+
 
     return root
 

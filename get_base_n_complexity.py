@@ -3,7 +3,7 @@ matplotlib.use("Agg")
 from anytree import RenderTree, AsciiStyle
 import matplotlib.pyplot as plt
 
-from language_tree import make_tree, calc_complexity
+from language_tree import make_tree, calc_complexity, forest_disp, disp
 from langstrategy import first_three, successors
 
 
@@ -20,11 +20,43 @@ def make_rules_up_to_base(base: int):
 
     return forest
 
+def _make_general_rules(base: int, ulim: int, forest: list):
+    # TODO: fix this
+    num_constituents = div_power(base, ulim)
+    forest.append(make_tree(["u", "B"], ["u", str(base)], "MUL"))
+    forest.append(make_tree(["v", "w"], ["u", "v"], "ADD"))
+
+    exp = 2
+    i = base ** exp
+    while i in range(base ** 2, ulim + 1):
+        forest.append(make_tree("B" + str(exp), str(exp), [str(base), str(exp)], "POW"))
+        exp += 1
+        i = base ** exp
+    
+    constituent_names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+    for i in range(3, num_constituents):
+        form = constituent_names[:i]
+        numexp = constituent_names[:i]
+        forest.append(make_tree(form, numexp, "MTA_LONG"))
+
+    for i in range(num_constituents):
+        forest.append(make_tree(constituent_names[i] + "_mem", [str(i) for i in range(1, base)], "MEM"))
+
+    return forest
+
 
 def make_general_rules(base: int, ulim: int, forest: list):
     forest.append(make_tree(["u", "B"], ["u", base], "MUL"))
     forest.append(make_tree(["v", "w"], ["u", "v"], "ADD"))
+    
     forest.append(make_tree("u", [i for i in range(2, base) if not is_power_of(base, i * base)], "MEM")) 
+    # Generate separate terms for powers of the base  
+    exp = 2
+    i = base ** exp
+    while i in range(base ** 2, ulim + 1):
+        forest.append(make_tree("B" + str(exp), str(exp), [str(base), str(exp)], "POW"))
+        exp += 1
+        i = base ** exp
 
     # Don't double-count powers of the base   
     bases = set()
@@ -38,14 +70,6 @@ def make_general_rules(base: int, ulim: int, forest: list):
     forest.append(make_tree("v", list(bases), "MEM"))
     forest.append(make_tree("w", list(atoms), "MEM"))
 
-    # Generate separate terms for powers of the base  
-    exp = 2
-    i = base ** exp
-    while i in range(base ** 2, ulim + 1):
-        forest.append(make_tree("B", str(exp), [str(base), str(exp)], "POW"))
-        exp += 1
-        i = base ** exp
-
     return forest
 
 
@@ -56,6 +80,17 @@ def is_power_of(base: int, num: int):
         return True
     else:
         return is_power_of(base, num / base)
+
+def div_power(base: int, num: int):
+    if num < 0:
+        raise ValueError
+    elif num == 0:
+        return 0
+    exp = 0
+    while base <= num:
+        num /= base
+        exp += 1
+    return exp + 1
 
 def plot_complexities(min_num: int, max_num: int, complexities: list, filename: str = "base_n_complexities"):
     ax = plt.gca()
@@ -73,15 +108,16 @@ if __name__ == "__main__":
     complexities = [None, 397]  # base 1 doesn't follow same pattern, add empty value so can start at 0
     for base in range(2, 50):
         rules = make_rules_up_to_base(base)
-        rules = make_general_rules(base, 100, rules)
+        rules = make_general_rules(base, 1000, rules)
         print("== Base {} ==".format(base))
         for rule in rules:
             print(RenderTree(rule, style=AsciiStyle()))
+        #forest_disp(rules, str(base))
         comp = calc_complexity(rules)
         print(comp)
         complexities.append(comp)
     print(complexities)
 
-    plot_complexities(0, 50, complexities)
+    plot_complexities(0, 50, complexities, filename="complexities_1000")
     
             
