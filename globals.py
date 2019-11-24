@@ -1,0 +1,6 @@
+# Font sizes for plotting
+SMALL_SIZE = 14
+MEDIUM_SIZE = 16
+MEDIUM_LARGE_SIZE = 18
+BIG_SIZE = 20
+JUMBO_SIZE = 22

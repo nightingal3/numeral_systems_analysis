@@ -129,13 +129,16 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
             numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, -1)
         comp_upper_bound, cost_upper_bound, mus_max = test_gauss_blob_place_mu_greedy(len(
             numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, 1)
+
         cost_lower_bound.extend(cost_upper_bound)
         comp_lower_bound.extend(comp_upper_bound)
         costperm_rand.append(cost_lower_bound)
         complexperm_rand.append(comp_lower_bound)
+        mus_best_rand.append(mus_min)
+        mus_worst_rand.append(mus_max)
 
     comp_rand, cost_rand = reconfig_comp_cost(complexperm_rand, costperm_rand)
-
+    
     compfenew = [0] * len(numterms_2)
     costfenew = [0] * len(numterms_2)
     # Exact restricted systems
@@ -176,6 +179,8 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
             compfe1new[i] = 3 + 4*(ncats - 1)
         costfe1new[i] = compute_cost.compute_cost_size_principle_arb(
             modemap, need_probs)
+        print(numterms_2[i])
+        print(modemap)
 
     # recursive systems
     min_recursive, max_recursive = compute_base_n_complexities()
@@ -213,9 +218,12 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="norma
     if dist_type == "uniform":
         offsets = {"war": (-5, 3), "prh": (0, 1), "goo": (5, 0), "geo": (0, -2), "eng": (0, -2), "ain": (0, 3), "geo": (
             0, 2), "mnd": (-0.02, -2), "wsk": (0, 1), "ana": (-5, 1), "awp": (-0.5, 3), "myu": (3, 0)}  # sadly must be done
+    elif dist_type == "steep":
+        offsets = {"war": (0, 0.05), "prh": (5, 0.02), "goo": (5, 0), "geo": (0, -0.2), "eng": (0, -0.2), "ain": (0.2, 0.2), "geo": (
+            0, -0.2), "mnd": (0, -0.2), "wsk": (0, 0.07), "ana": (3, 0.1), "awp": (3.25, 0.05), "myu": (2, -0.1)}
     else:
-        offsets = {"war": (0, 0.05), "prh": (5, 0.02), "goo": (5, 0), "geo": (0, -0.2), "eng": (0, -0.2), "ain": (0, 0.1), "geo": (
-            0, -0.2), "mnd": (-0.02, -0.2), "wsk": (0, 0.07), "ana": (0, 0.1), "awp": (-0.5, 0.05), "myu": (0, 0)}  # sadly must be done
+        offsets = {"war": (0, 0.05), "prh": (5, 0.02), "goo": (5, 0), "geo": (0, -0.2), "eng": (0, -0.2), "ain": (0.2, 0.1), "geo": (
+            0, -0.2), "mnd": (-0.25, 0), "wsk": (0, 0.07), "ana": (0, 0.1), "awp": (-0.5, 0.05), "myu": (0, 0)}  # sadly must be done
 
     seen = set()
     for lang in lang_info:
@@ -256,11 +264,6 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="norma
 
     hull_exact = ConvexHull(exact_points)
     hull_approx = ConvexHull(approx_points)
-
-    print("Exact hull simplices:")
-    print(hull_exact.simplices)
-    print("Approx hull simplices:")
-    print(hull_approx.simplices)
 
     for simplex in hull_exact.simplices:
         plt.plot(exact_points[simplex, 0],
@@ -331,8 +334,7 @@ def reconfig_comp_cost(comp_m, cost_m):
         zinds = find(cost[i], float("inf"))
         cost[i] = [val for index, val in enumerate(
             cost[i]) if index not in zinds]
-    print(unique)
-    print(cost)
+
     return unique, cost
 
 
@@ -346,20 +348,19 @@ def main():
     need_probs_uniform = [float(1)/100 for i in range(0, 100)]
     need_probs_steeper = [float(i) for i in f1.read().split("\n")[:-1]]
 
-    aggregate_communicative_costs(need_probs_uniform, c, "attested_bayesian.p")
+    aggregate_communicative_costs(need_probs_steeper, c, "attested_bayesian.p")
     y = generate_hypothetical_systems(
-        [i for i in range(1, 101)], 2.28, 0.31, need_probs_uniform)
+        [i for i in range(1, 101)], 2.28, 0.31, need_probs_steeper)
 
     f1 = open("attested_bayesian.p", "rb")
     x = pickle.load(f1)
-    print(x.keys())
+
     x["eng"] = (126, 0, 6)
     x["mnd"] = (92, 0, 6)
     x["geo"] = (167, 0, 6)
     x["ain"] = (121, 0, 6)
 
-    print(x)
-    plot_cost_vs_complexity(x, y, "cvc_w_mund_uni", dist_type="uniform")
+    plot_cost_vs_complexity(x, y, "cvc_w_mund_steep", dist_type="steep")
     f.close()
     end = timer()
     minutes, secs = divmod(end - start, 60)

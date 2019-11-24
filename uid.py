@@ -537,7 +537,7 @@ if __name__ == "__main__":
     num_iterations_shuffle_test = 100000
     # Whether to plot a histogram(0) or box-plot(1) for shuffle/permutation test
     want_hist = 0
-    tabulate_accuracy = 1  # Whether or not to print accuracy metrics for UID/RIG
+    tabulate_accuracy = 0  # Whether or not to print accuracy metrics for UID/RIG
 
     ###
 
@@ -560,7 +560,7 @@ if __name__ == "__main__":
     UID_dict = UID_dev[selected_langname]
     UID_dict_alt = UID_dev[selected_langname_alt]
 
-    plot_mini(info_trajs, selected_langname, ext=".png")
+    plot_mini(info_trajs, selected_langname, ext=".eps")
     plot_area(area, selected_lang, 100)
     plot_uid(UID_dict, UID_dict_alt, selected_langname)
 

@@ -69,16 +69,21 @@ def plot_terms_gradient(term_maps):
         ax.axis("off")
 
     colors_per_term = { 
-        1: ["#e50012"],
-        3: ["#e50012", "#750068", "#0500bf"],
-        4: ["#e50012", "#9a004b", "#4f0085", "#0500bf"],
-        5: ["#e50012", "#ad003d", "#750068", "#3d0093", "#0500bf"],
-        6: ["#e50012", "#b80034", "#8b0057", "#5e0079", "#31009c", "#0500bf"],
-        10: ["#e50012", "#d00021", "#bc0031", "#a70041", "#930050", "#7f0060", "#6a0070", "#560080", "#42008f", "#2d009f", "#1900af", "#0500bf"],
-        14: ["#e50012", "#d6001d", "#c70029", "#b80034", "#a90040", "#9a004b", "#8b0057", "#7c0062", "#6d006e", "#5e0079", "#4f0085", "#400090", "#31009c", "#2200a7", "#1300b3", "#0500bf"],
-        15: ["#e50012", "#d5001e", "#c5002a", "#b50037", "#a50043", "#a50037", "#95004f", "#85005c", "#750068", "#650074", "#550081", "#45008d", "#350099", "#2500a6", "#1500b2", "#0500bf"]
+        1: ["#3182bd"],
+        3: ["#3182bd", "#6baed6", "#9ecae1"],
+        4: ["#3182bd", "#6baed6", "#9ecae1", "#c6dbef"],
+        5: ["#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#fd8d3c"],
+        6: ["#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#fd8d3c", "#fdae6b"],
+        10: ["#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#fd8d3c", "#fdae6b", "#fdd0a2", "#31a354", "#74c476", "#a1d99b", "#c7e9c0", "#756bb1"],
+        14: ["#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#fd8d3c", "#fdae6b", "#fdd0a2", "#31a354", "#74c476", "#a1d99b", "#c7e9c0", "#756bb1", "#9e9ac8", "#bcbddc", "#dadaeb", "#636363"],
+        15: ["#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#fd8d3c", "#fdae6b", "#fdd0a2", "#31a354", "#74c476", "#a1d99b", "#c7e9c0", "#756bb1", "#9e9ac8", "#bcbddc", "#dadaeb", "#636363"]
     }
 
+    new_cmap = matplotlib.cm.get_cmap("tab20c")
+    for i in range(new_cmap.N):
+        rgb = new_cmap(i)[:3]
+        print(matplotlib.colors.rgb2hex(rgb))
+    #assert False
     offsets = {"Piraha": -0.4, "Gooniyandi": -0.7, "Achagua": -0.55, "Kayardild": -0.6, "Wichi": -0.35, "English": -0.45}
 
     bound_approx_systems = len(lang_term_bounds["Approximate"]) * 3
@@ -86,11 +91,11 @@ def plot_terms_gradient(term_maps):
     bound_recursive_systems = len(lang_term_bounds["Recursive"]) * 3 
 
     colorbar_gen = create_colorbar_generator(axes, colors_per_term, offsets, num_rows, num_cols)
-    offset = colorbar_gen(bound_approx_systems, lang_term_bounds["Approximate"], "Approximate", ideal_bounds_approx_flat)
-    offset = colorbar_gen(bound_exact_systems + offset, lang_term_bounds["Exact"], "Exact", ideal_bounds_exact_flat)
+    offset = colorbar_gen(bound_approx_systems, lang_term_bounds["Approximate"], "Approximate", ideal_bounds_approx)
+    offset = colorbar_gen(bound_exact_systems + offset, lang_term_bounds["Exact"], "Exact", ideal_bounds_exact)
     colorbar_gen(bound_recursive_systems + offset, lang_term_bounds["Recursive"], "Recursive", {14:[i for i in range(1, 16)]})
     plt.subplots_adjust(left=0.13,bottom=0.21,right=0.94,top=0.89,wspace=0.76,hspace=0.65)
-    plt.savefig("colormaps_flat.png")
+    plt.savefig("colormaps_new.png")
     plt.gcf().clear()
 
 
@@ -125,11 +130,11 @@ def plot_colorbar(ax, colors, bounds, text, x_offset = -0.7, y_offset = 0.3):
     cmap = matplotlib.colors.ListedColormap(colors)
     colorbar = matplotlib.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation="horizontal", spacing="proportional")
 
-    colorbar.set_ticks([i for i in range(0, 16, 5)])
+    colorbar.set_ticks([1, 2, 3, 4] + [i for i in range(5, 16, 5)])
 
     if text != "Optimal":
         ax.axis("on")
-        colorbar.set_ticklabels([i for i in range(0, 16, 5)])
+        colorbar.set_ticklabels([1, 2, 3, 4] + [i for i in range(5, 16, 5)])
 
     ax.text(x_offset, y_offset, text, fontsize=10)
 

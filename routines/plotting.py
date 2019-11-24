@@ -23,8 +23,8 @@ def plot_uid(attested_uid_dev, alternate_uid_dev, langname, attested_color="red"
     plt.bar(x_alt, y_alt, color="green", label="Alternate order", alpha=0.5)
     plt.bar(x, y, color="red", label="Attested order", alpha=0.5)
     # Hide the right and top spines
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
+    #ax.spines['right'].set_visible(False)
+    #ax.spines['top'].set_visible(False)
 
     # Only show ticks on the left and bottom spines
     ax.yaxis.set_ticks_position('left')
@@ -45,6 +45,7 @@ def plot_uid(attested_uid_dev, alternate_uid_dev, langname, attested_color="red"
     plt.title("Uniform information density (UID)",
               fontsize=font_sizes["BIG_SIZE"])
     plt.savefig(langname + "_100_num_UID_dev.png")
+    plt.savefig(langname + "_100_num_UID_dev.pdf")
     plt.tight_layout()
     plt.gcf().clear()
 
@@ -105,11 +106,12 @@ def plot_area(area_dict, langname, maxval):
     plt.xticks(fontsize=font_sizes["MEDIUM_SIZE"])
     plt.xlim(10, 100)
     plt.yticks(fontsize=font_sizes["MEDIUM_SIZE"])
-    plt.ylabel("Surprisal (bits)", fontsize=font_sizes["BIG_SIZE"])
+    plt.ylabel("Cumulative surprisal (bits)", fontsize=font_sizes["BIG_SIZE"])
     plt.legend(prop={"size": font_sizes["MEDIUM_SIZE"]}, loc="upper right")
     plt.title("Rapid information gain (RIG)", fontsize=font_sizes["BIG_SIZE"])
     plt.subplots_adjust(bottom=0.15)
     plt.savefig("Area_" + langname + ".png")
+    plt.savefig("Area_" + langname + ".pdf")
     plt.gcf().clear()
 
 
