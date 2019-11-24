@@ -1,13 +1,5 @@
-# Numeral systems analysis
-
-This repository contains code needed to replicate the findings in the papers *Numeral systems across languages support efficient communication: From approximate numerosity to recursion*, *Rapid information gain explains cross-linguistic tendencies in numeral ordering*, and *Rapid information gain explains ordering in numeral expressions across languages*.
-
-(They're all related, as you can tell). 
-
-## Project description 
-
-## Project file structure
-
-## Data
-
-## Workflow
+/data: contains need probabilities for languages included in the study. Munduruku data is from Pica, 2004.
+show_munduruku_fit.py: produces Munduruku figure.
+show_need_probability.py: produces need probability graph.
+aggregate_complexities_and_costs.py: produces main complexity/cost tradeoff figure. Can swap in different need distributions from data folder.
+get_base_n_complexity.py: plot complexities for a range of recursive bases.
