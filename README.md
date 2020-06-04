@@ -1,3 +1,8 @@
+Data and code from this repository replicate work in the following publication:
+
+Xu, Y., Liu, E., and Regier, T. (in press) Numeral systems across languages support efficient communication: From approximate numerosity to recursion. Open Mind: Discoveries in Cognitive Science.
+
+
 -/data: contains need probabilities for languages included in the study. Munduruku data is from Pica, 2004.
 
 -show_munduruku_fit.py: produces Munduruku figure.
