@@ -179,8 +179,6 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
             compfe1new[i] = 3 + 4*(ncats - 1)
         costfe1new[i] = compute_cost.compute_cost_size_principle_arb(
             modemap, need_probs)
-        print(numterms_2[i])
-        print(modemap)
 
     # recursive systems
     min_recursive, max_recursive = compute_base_n_complexities()
