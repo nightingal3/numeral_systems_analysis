@@ -7,7 +7,7 @@ from language_tree import make_tree, calc_complexity, forest_disp, disp
 from langstrategy import first_three, successors
 
 
-def make_rules_up_to_base(base: int):
+def make_rules_up_to_base(base):
     forest = [] 
     if base < 4:  # Handle bases smaller than subitizing range
         for i in range(1, base):
@@ -20,7 +20,7 @@ def make_rules_up_to_base(base: int):
 
     return forest
 
-def _make_general_rules(base: int, ulim: int, forest: list):
+def _make_general_rules(base, ulim, forest):
     # TODO: fix this
     num_constituents = div_power(base, ulim)
     forest.append(make_tree(["u", "B"], ["u", str(base)], "MUL"))
@@ -45,7 +45,7 @@ def _make_general_rules(base: int, ulim: int, forest: list):
     return forest
 
 
-def make_general_rules(base: int, ulim: int, forest: list):
+def make_general_rules(base, ulim, forest):
     forest.append(make_tree(["u", "B"], ["u", base], "MUL"))
     forest.append(make_tree(["v", "w"], ["u", "v"], "ADD"))
     
@@ -73,7 +73,7 @@ def make_general_rules(base: int, ulim: int, forest: list):
     return forest
 
 
-def is_power_of(base: int, num: int):
+def is_power_of(base, num):
     if num < base:
         return False
     elif num == base:
@@ -81,7 +81,7 @@ def is_power_of(base: int, num: int):
     else:
         return is_power_of(base, num / base)
 
-def div_power(base: int, num: int):
+def div_power(base, num):
     if num < 0:
         raise ValueError
     elif num == 0:
@@ -92,7 +92,7 @@ def div_power(base: int, num: int):
         exp += 1
     return exp + 1
 
-def plot_complexities(min_num: int, max_num: int, complexities: list, filename: str = "base_n_complexities"):
+def plot_complexities(min_num, max_num, complexities, filename = "base_n_complexities"):
     ax = plt.gca()
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
