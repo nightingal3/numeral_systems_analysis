@@ -111,7 +111,7 @@ if __name__ == "__main__":
         rules = make_general_rules(base, 1000, rules)
         comp = calc_complexity(rules)
         complexities.append(comp)
-    print(enumerate(complexities))
+    print(list(enumerate(complexities)))
 
     plot_complexities(0, 50, complexities, filename="complexities_1000")
     
