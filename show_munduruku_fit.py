@@ -11,20 +11,19 @@ sys.path.insert(0, "routines")
 plt.style.use("seaborn-colorblind")
 
 
-def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subitize", filename="mund_comp_nosub"):
+def show_munduruku_fit(percent_file, terms_file, term_interp_file, w=0.31, model="subitize", out_name="mund_comp"):
     # Data is from Pica(2004)
     subrange = [1, 2, 3]
     mu_range = []
     mu_range.extend(range(1, 16))
-    w = 0.31
     c = 1 / (math.sqrt(2)*w)
 
     numberline = mu_range
     percent = np.loadtxt(open(percent_file, "rb"),
                          delimiter=",").astype("float")
-    terms = np.loadtxt(open(terms_file, "rb"), delimiter=",", dtype="string")
+    terms = np.loadtxt(open(terms_file, "rb"), delimiter=",", dtype="str")
     term_interp = np.loadtxt(open(term_interp_file, "rb"),
-                             delimiter=",", dtype="string")
+                             delimiter=",", dtype="str")
     nnum, ncat = 15, terms.shape[0]
 
     bias = 55 * percent
@@ -101,13 +100,13 @@ def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subiti
     ax_model.set_yticks([0.1 * x for x in range(0, 11)])
     ax_model.set_ybound((0, 1))
     plt.tight_layout()
-    plt.savefig(filename + ".png", dpi=1000, bbox_extra_artists=(
+    plt.savefig(f"{out_name}.png", dpi=1000, bbox_extra_artists=(
         lgd, lab_a, lab_b), bbox_inches="tight")
-    plt.savefig(filename + ".eps", dpi=1000, bbox_extra_artists=(
+    plt.savefig(f"{out_name}.eps", dpi=1000, bbox_extra_artists=(
         lgd, lab_a, lab_b), bbox_inches="tight")
     
 
 
 if __name__ == "__main__":
     show_munduruku_fit("data/munduruku_pica2004/percent.csv", "data/munduruku_pica2004/terms.csv",
-                       "data/munduruku_pica2004/term_interp.csv", model="no_subitize")
+                       "data/munduruku_pica2004/term_interp.csv", w=0.15, model="subitize", out_name="mund0.15")
