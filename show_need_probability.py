@@ -8,7 +8,7 @@ import matplotlib
 matplotlib.use("Agg")
 
 
-def plot_need_probability(filepath, filepath_fit):
+def plot_need_probability(filepath, filepath_fit, filename="need_probs_plot"):
     f = open(filepath, "r")
     f1 = open(filepath_fit, "r")
     numberline = []
@@ -31,8 +31,8 @@ def plot_need_probability(filepath, filepath_fit):
 
     plt.ylabel("Log frequency", size=16)
     plt.xlabel("Number", size=16)
-    plt.savefig("needprobs_1.png")
-    plt.savefig("needprobs_1.eps")
+    plt.savefig(filename + ".png")
+    plt.savefig(filename + ".eps")
 
     f.close()
     f1.close()
