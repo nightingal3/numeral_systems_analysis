@@ -3,7 +3,6 @@ import math
 import pickle
 import os
 import inspect
-from collections import defaultdict
 
 from itertools import chain
 from timeit import default_timer as timer
@@ -21,7 +20,7 @@ from routines import compute_cost, test_gauss_blob_place_mu_greedy
 import langstrategy
 import language_tree
 from config import *
-import pdb
+
 
 
 def aggregate_complexities():
@@ -41,7 +40,7 @@ def aggregate_complexities():
     return info
 
 
-def aggregate_communicative_costs(need_probs, lang_info, dict_name="attested.p", w=0.31):
+def aggregate_communicative_costs(need_probs, lang_info, dict_name="attested.p"):
     """ Aggregates the communicative costs for attested languages.
     lang_info should be a dict organized as {lang:(comp, num_type)}"""
 
@@ -49,12 +48,10 @@ def aggregate_communicative_costs(need_probs, lang_info, dict_name="attested.p",
     complexities = [i[1][0] for i in lang_info.items()]
     lang_by_category = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []}
     term = {"prh": ["hoi_1", "hoi_2", "aibaagi"], "war": ["xica pe", "dois"], "goo": [
-        "yoowarni", "garndiwiddidi", "ngarloodoo", "marla"], "myu": ["pug", "xep xep", "ebapug", "ebadipdip", "adesu", "ade"], 
-        "chi": ["taman", "surumana"], "fuy": ["fidan", "yovalo", "yovalo hul mindan",  "hukas"],
-        "knk": ["putchik", "narimbo", "krutuip", "inhauit"]}
+        "yoowarni", "garndiwiddidi", "ngarloodoo", "marla"], "myu": ["pug", "xep xep", "ebapug", "ebadipdip", "adesu", "ade"]}
     num_term_pt = {"prh": [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], "war": [
-        1, 2], "goo": [1, 2, 3, 3, 4], "myu": [1, 2, 3, 4] + [5] * 7, "chi": [1], "fuy": [1, 2, 3], "knk": [1, 2, 3]}
-    end_category = {"prh": 0, "war": 0, "goo": 0, "myu": 0, "chi": 0, "fuy": 0, "knk": 0}
+        1, 2], "goo": [1, 2, 3, 3, 4], "myu": [1, 2, 3, 4] + [5] * 7}
+    end_category = {"prh": 0, "war": 0, "goo": 0, "myu": 0}
     numberline = [i for i in range(1, 101)]
     for item in lang_info.items():
         lang_by_category[item[1][1]].append(item[0])
@@ -64,7 +61,7 @@ def aggregate_communicative_costs(need_probs, lang_info, dict_name="attested.p",
     # Restricted approximate systems
     for lang in lang_by_category[0]:
         costs[lang] = compute_cost.compute_approx_cost(
-            term[lang], numberline, num_term_pt[lang], end_category[lang], need_probs, w=w)
+            term[lang], numberline, num_term_pt[lang], end_category[lang], need_probs)
 
     # Restricted exact systems
     for lang in lang_by_category[1]:
@@ -128,29 +125,10 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
 
     # Approximate systems
     for t in range(len(numterms)):
-        comp_lower_bound, cost_lower_bound, mus_min, term_map_min = test_gauss_blob_place_mu_greedy(len(
+        comp_lower_bound, cost_lower_bound, mus_min = test_gauss_blob_place_mu_greedy(len(
             numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, -1)
-        comp_upper_bound, cost_upper_bound, mus_max, term_num_max = test_gauss_blob_place_mu_greedy(len(
+        comp_upper_bound, cost_upper_bound, mus_max = test_gauss_blob_place_mu_greedy(len(
             numberline), numterms[t], numberline, [i for i in range(max(numberline))], c, w, need_probs, nitr, 1)
-
-        #print(" === ", numterms[t], " ===")
-        #print("comp: ", max(comp_upper_bound))
-        #print("cost: ", max(cost_upper_bound))
-        #print(mus_max)
-        '''not_inf = lambda x: x != float("inf")
-        inf_1 = set([i for i, x in enumerate(comp_lower_bound) if x == float("inf")])    
-        inf_2 = set([i for i, x in enumerate(comp_upper_bound) if x == float("inf")])
-        inf_3 = set([i for i, x in enumerate(cost_lower_bound) if x == float("inf")])
-        inf_4 = set([i for i, x in enumerate(cost_upper_bound) if x == float("inf")])
-
-        discard_inds = set.intersection(inf_1, inf_2, inf_3, inf_4)
-
-        comp_lower_bound = list(filter(not_inf, comp_lower_bound))
-        cost_lower_bound = list(filter(not_inf, cost_lower_bound))
-        comp_upper_bound = list(filter(not_inf, comp_upper_bound))
-        cost_upper_bound = list(filter(not_inf, cost_upper_bound))
-        mus_min = [mu for i, mu in enumerate(mus_min) if i not in discard_inds]
-        mus_max = [mu for i, mu in enumerate(mus_max) if i not in discard_inds]'''
 
         cost_lower_bound.extend(cost_upper_bound)
         comp_lower_bound.extend(comp_upper_bound)
@@ -174,12 +152,9 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
         else:
             compfenew[i] = 3*3 + (tn - 3) * 4 + 4
         costfenew[i] = compute_cost.compute_cost_size_principle(tn, need_probs)
-        #print(compfenew[i])
-        #print(costfenew[i])
 
     compfe1new = [0] * len(numterms_2)
     costfe1new = [0] * len(numterms_2)
-
     nnum = len(numberline)
     for i in range(len(numterms_2)):
         ncats = numterms_2[i]
@@ -197,24 +172,18 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
         elif ncats == 3:
             modemap = [1, 2]
             modemap.extend([3] * (nnum - 2))
-            compfe1new[i] = 3*2 + 4*(ncats - 2)
+            compfe1new[i] = 3*3 + 4*(ncats - 2)
         elif ncats == 2:
             modemap = [1]
             modemap.extend([2] * (nnum - 1))
             compfe1new[i] = 3 + 4*(ncats - 1)
-            #print(compfe1new[i])
-            #print(3 + 4*(ncats - 1))
-            #print(compute_cost.compute_cost_size_principle_arb(modemap[::-1], need_probs))
-            #assert False
         costfe1new[i] = compute_cost.compute_cost_size_principle_arb(
-            modemap[::-1], need_probs)
-        print("num terms: ", ncats)
-        print(compfe1new[i])
-        print(costfe1new[i])
+            modemap, need_probs)
+        print(numterms_2[i])
+        print(modemap)
 
     # recursive systems
-    #min_recursive, max_recursive = compute_base_n_complexities()
-    min_recursive, max_recursive = [48, 399]
+    min_recursive, max_recursive = compute_base_n_complexities()
     base_n_complexity = [min_recursive, max_recursive]
 
     if write:
@@ -232,68 +201,43 @@ def generate_hypothetical_systems(numberline, c, w, need_probs, stored_data_dir=
     return comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity
 
 
-def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="normal", w=0.31, plot_inefficient=False):
-    """ Plots cost against complexity for both attested and hypothetical systems."""
+def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="normal"):
+    """ Plots cost against complexity for both attested and hypothetical systems.
+    The hypothetical systems will be plotted as a convex hull and not as individual points."""
     fig, ax = plt.subplots()
 
     # stretch plot horizontally a bit
-    print(lang_info)
-    """reversed_dict = defaultdict(list)
-    for key, value in lang_info.items():
-        reversed_dict[value].append(key)
-    print(reversed_dict)"""
+    #curr_size = plt.rcParams["figure.figsize"]
+    #plt.figure(figsize=(curr_size[0] + 2, curr_size[1]))
 
     # attested languages
-    langcode_to_name = {"ana": "Araona$^1$", "awp": "Awa Pit$^2$", "ram": "Rama$^3$", "war": "Wari", "prh": "Piraha", "goo": "Gooniyandi", "wch": "Wichi",
-                        "wsk": "Waskia", "hpd": "Hup", "mnd": "Mandarin", "ain": "Ainu", "eng": "English", "geo": "Georgian", "myu": "Munduruku",
-                        "chi": "Chiquitano", "fuy": "Fuyuge", "knk": "Krenák", "spa": "Spanish", "fre": "French"}
-    colorscheme = {1: "green", 6: "blue", 5: "blue", 0: "red"}
+    langcode_to_name = {"ana": "Araona", "awp": "Awa Pit", "ram": "Rama", "war": "Wari", "prh": "Piraha", "goo": "Gooniyandi", "wch": "Wichi",
+                        "wsk": "Waskia", "hpd": "Hup", "mnd": "Mandarin", "ain": "Ainu", "eng": "English", "geo": "Georgian", "myu": "Munduruku"}
+    colorscheme = {1: "green", 6: "blue", 0: "red"}
 
     if dist_type == "uniform":
-        offsets = {"war": (-5, 2), "prh": (0, 1), "goo": (5, 0), "geo": (0, -2), "eng": (-15, -2), "ain": (0, -2), "geo": (
-            0, -2), "mnd": (-0.02, -2), "wsk": (0, 1), "ana": (-5, 1), "awp": (-0.5, 3), "myu": (3, 0), "chi": (-18, 2), "fuy": (0, 2), "myi": (5, 0), "ram": (5, 0),
-            "knk":(0, -3), "fre": (5, 3), "spa": (-15, 3)}  # sadly must be done
+        offsets = {"war": (-5, 3), "prh": (0, 1), "goo": (5, 0), "geo": (0, -2), "eng": (0, -2), "ain": (0, 3), "geo": (
+            0, 2), "mnd": (-0.02, -2), "wsk": (0, 1), "ana": (-5, 1), "awp": (-0.5, 3), "myu": (3, 0)}  # sadly must be done
     elif dist_type == "steep":
-        offsets = {"war": (0, 0.05), "prh": (5, 0), "goo": (5, 0.1), "geo": (0, -0.2), "eng": (-15, -0.1), "ain": (0.2, -0.1), "geo": (
-            0, -0.1), "mnd": (0, -0.1), "wsk": (0, 0.07), "ana": (3, 0.1), "awp": (-5, -0.1), "myu": (14, 0.05), "fre": (5, 0.1), "spa": (-15, 0.1),
-            "ram": (5, -1), "ana": (-20, -0.5), "knk": (0, 0.05), "chi": (5, 0), "fuy": (-3, 0.1)}
-    elif w == 0.15:
-        offsets = {"war": (0, 0.5), "prh": (5, 0.02), "goo": (-17, -1), "geo": (0, -2), "eng": (-15, -2), "ain": (0, -2), "geo": (
-            0, -2), "mnd": (0, -2), "wsk": (0, 0.5), "ana": (-13, 0), "awp": (-3, -1), "myu": (5, 0), "fre": (5, 0.5), "spa": (-15, 0.5),
-            "fuy": (5, 0), "knk": (0, 0.75), "ram": (0, -0.5), "chi": (-1, -1.5), "hpd": (0, 0.5), "wch": (0, 0.5)}  # sadly must be done
-    elif w == 0.25:
-        offsets = {"war": (0, 0.15), "prh": (5, 0.02), "goo": (-27, -0.25), "geo": (0, -0.2), "eng": (-15, -0.5), "ain": (0, -0.5), "geo": (
-            0, -0.5), "mnd": (0, -0.5), "wsk": (0, 0.07), "ana": (-20, -0.5), "awp": (-15, -0.35), "myu": (5, 0),
-            "hpd": (0, 0.25), "wch": (0, 0.25), "ram": (3, -1.25), "chi": (5, 0), "knk": (0, 0.15), "spa": (-15, 0.25), "fre": (5, 0.25),
-            "fuy": (5, 0)}  # sadly must be done
+        offsets = {"war": (0, 0.05), "prh": (5, 0.02), "goo": (5, 0), "geo": (0, -0.2), "eng": (0, -0.2), "ain": (0.2, 0.2), "geo": (
+            0, -0.2), "mnd": (0, -0.2), "wsk": (0, 0.07), "ana": (3, 0.1), "awp": (3.25, 0.05), "myu": (2, -0.1)}
     else:
-        offsets = {"war": (0, 0.15), "prh": (5, -0.1), "goo": (-27, 0), "eng": (-15, -0.5), "ain": (0, -0.5), "geo": (
-            0, -0.5), "mnd": (-0.25, 0.25), "wsk": (0, 0.25), "ana": (-15, -0.35), "awp": (-5, -0.55), "myu": (5, 0),
-            "chi": (0, 0.15), "spa": (-10, 0.25), "knk": (5, 0), "ram": (5, -1.15), "hpd": (0, 0.1), "fuy": (0, 0.2),
-            "mnd": (0, -0.25), "hpd": (0, 0.25), "fre": (5, 0.45), "wch": (5, -0.15)}  # sadly must be done
+        offsets = {"war": (0, 0.05), "prh": (5, 0.02), "goo": (5, 0), "geo": (0, -0.2), "eng": (0, -0.2), "ain": (0.2, 0.1), "geo": (
+            0, -0.2), "mnd": (-0.25, 0), "wsk": (0, 0.07), "ana": (0, 0.1), "awp": (-0.5, 0.05), "myu": (0, 0)}  # sadly must be done
 
-    seen = {}
+    seen = set()
     for lang in lang_info:
         x_offset = 5
         y_offset = 0.05
         if lang in offsets:
             x_offset = offsets[lang][0]
             y_offset = offsets[lang][1]
-        else:
-            x_offset = 0
-            y_offset = 0
         if (lang_info[lang][0], lang_info[lang][1]) not in seen:
-            seen[(lang_info[lang][0], lang_info[lang][1])] = 1
-        else:
-            y_offset += 0.5 * seen[(lang_info[lang][0], lang_info[lang][1])]
-            seen[(lang_info[lang][0], lang_info[lang][1])] += 1
-
-
-        ax.plot([lang_info[lang][0]], [lang_info[lang][1]], marker='o', color=colorscheme[lang_info[lang]
+            ax.plot([lang_info[lang][0]], [lang_info[lang][1]], marker='o', color=colorscheme[lang_info[lang]
                                                                                               [2]], markersize=7, markerfacecolor="none", linewidth=3, zorder=999)
-        if lang in langcode_to_name:                                                                              
             ax.annotate(langcode_to_name[lang], (lang_info[lang][0] +
-                                                x_offset, lang_info[lang][1] + y_offset), size=7, zorder=999)
+                                                 x_offset, lang_info[lang][1] + y_offset), size=7, zorder=999)
+            seen.add((lang_info[lang][0], lang_info[lang][1]))
 
     # hypothetical languages
     comp_rand, cost_rand, compfenew, costfenew, compfe1new, costfe1new, base_n_complexity = hyp_lang_info
@@ -315,28 +259,8 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="norma
     assert len(comp_rand_new) == len(cost_rand_new)
     compfenew.extend(compfe1new)
     costfenew.extend(costfe1new)
-    
-    # plot actual points
-    #pdb.set_trace()
-    plt.scatter(compfenew, costfenew, color="#CDCFD3", s=2)
-    plt.scatter(comp_rand_new, cost_rand_new, color="#676768", s=2)
-
-    # sampled inefficient points
-    if plot_inefficient:
-        inefficient = [(11, 3.88, "A1"), (16, 3.65, "A2"), (20, 3.72, "A3"), (24, 3.61, "A4"),
-        (17, 8.21, "E1"), (21, 6.56, "E2"), (25, 5.88, "E3"), (29, 5.51, "E4")]
-        plt.scatter([11, 16, 20, 24], [3.88, 3.65, 3.72, 3.61], color="#fc03a9", s=3)
-        plt.scatter([17, 21, 25, 29], [8.21, 6.56, 5.88, 5.51], color="#fc03a9", s=3)
-
-        offsets = {"A1": (0, 0), "A2": (-7, -0.35), "A4": (4, -0.25), "A3": (2, 0.15)}
-        for pt in inefficient:
-            coord = (pt[0] + offsets[pt[2]][0], pt[1] + offsets[pt[2]][1]) if pt[2] in offsets else (pt[0] + 5, pt[1] + 0.15)
-            ax.annotate(pt[2], coord, size=7)
-    
     exact_points = np.transpose(np.array((compfenew, costfenew)))
     approx_points = np.transpose(np.array((comp_rand_new, cost_rand_new)))
-    #plt.plot(exact_points[:, 0], exact_points[:, 1])
-    #plt.plot(approx_points[:, 0], approx_points[:, 1])
 
     hull_exact = ConvexHull(exact_points)
     hull_approx = ConvexHull(approx_points)
@@ -361,11 +285,11 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="norma
     ax.spines["top"].set_visible(False)
 
     legend_elements = [
-        Line2D([0], [0], marker="o", color="r", lw=0,
+        Line2D([0], [0], marker="o", color="r", lw=1,
                markerfacecolor="none", label="Approximate"),
-        Line2D([0], [0], marker="o", color="g", lw=0,
+        Line2D([0], [0], marker="o", color="g", lw=1,
                markerfacecolor="none", label="Exact restricted"),
-        Line2D([0], [0], marker="o", color="b", lw=0,
+        Line2D([0], [0], marker="o", color="b", lw=1,
                markerfacecolor="none", label="Recursive"),
         Line2D([0], [0], color="b", lw=2, label="Hypothetical (Recursive)"),
         Patch(facecolor="#888889", edgecolor="#676768",
@@ -373,28 +297,20 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="norma
         Patch(facecolor="#e8e9ea", edgecolor="#CDCFD3",
               label="Hypothetical (Exact restr.)")
     ]
-    if plot_inefficient:
-        legend_elements.insert(3, Line2D([0], [0], marker=".", color="#fc03a9", lw=0,
-               markerfacecolor="#fc03a9", label="Hypothetical inefficient"))
-
     plt.legend(handles=legend_elements, loc="upper right", prop={"size": 8})
     plt.xlim(xmax=200)
 
-    if w == 0.15:
-        plt.ylim(ymax=24, ymin=-3)
-    elif w == 0.25:
-        plt.ylim(ymax=7, ymin=-2)
-    elif dist_type == "uniform":
+    if dist_type == "uniform":
         plt.ylim(ymax=50)
-    elif dist_type == "steep":
-        plt.ylim(ymax=2)
     else:
-        plt.ylim(ymax=9)
-    #ax.set_rasterized(True)
+        plt.ylim(ymax=3)
+    #ax.text(-0.13, 1.1, "A", transform=ax.transAxes, fontsize=14, fontweight="bold", va="top", ha="right")
+    ax.set_rasterized(True)
 
     plt.savefig(filename + ".png", dpi=1000)
     plt.savefig(filename + ".eps", dpi=500)
-    plt.savefig(filename + ".pdf")
+    plt.savefig(filename + ".pdf", dpi=500)
+    #plt.savefig("cvc_v2.eps", dpi=1000)
     plt.gcf().clear()
     return
 
@@ -423,32 +339,33 @@ def reconfig_comp_cost(comp_m, cost_m):
 
 
 def main():
+    start = timer()
     c = aggregate_complexities()
     f = open("data/need_probs/needprobs_eng_fit.csv")
-    f1 = open("data/need_probs/needprobs_eng_fit_2.csv")
+    f1 = open("data/need_probs/needprobs_eng_fit_1.csv")
 
-    need_probs = [float(i) for i in f.read().split("\n")[:-1]]
+    need_probs = [float(i) for i in f.read().split("\r\n")[:-1]]
     need_probs_uniform = [float(1)/100 for i in range(0, 100)]
     need_probs_steeper = [float(i) for i in f1.read().split("\n")[:-1]]
-    
-    """aggregate_communicative_costs(need_probs_uniform, c, "attested_bayesian_ext_03.p", w=0.31)
+
+    aggregate_communicative_costs(need_probs_steeper, c, "attested_bayesian.p")
     y = generate_hypothetical_systems(
-        [i for i in range(1, 101)], 2.28, 0.31, need_probs_uniform)
-    pickle.dump(y, open("hypothetical_systems_03.p", "wb"))"""
+        [i for i in range(1, 101)], 2.28, 0.31, need_probs_steeper)
 
-    f1 = open("attested_bayesian_ext_03.p", "rb")
+    f1 = open("attested_bayesian.p", "rb")
     x = pickle.load(f1)
-    y = pickle.load(open("hypothetical_systems_03.p", "rb"))
 
-    x["eng"] = (117, 0, 6)
-    x["mnd"] = (73, 0, 6)
-    x["geo"] = (153, 0, 6)
+    x["eng"] = (126, 0, 6)
+    x["mnd"] = (92, 0, 6)
+    x["geo"] = (167, 0, 6)
     x["ain"] = (121, 0, 6)
-    x["fre"] = (123, 0, 5)
-    x["spa"] = (118, 0, 6)
 
-    plot_cost_vs_complexity(x, y, "cvc_flat_new", w=0.31, dist_type="uniform", plot_inefficient=False)
+    plot_cost_vs_complexity(x, y, "cvc_w_mund_steep", dist_type="steep")
     f.close()
+    end = timer()
+    minutes, secs = divmod(end - start, 60)
+    print("Finished in " + str(minutes) +
+          " minutes and " + str(secs) + " seconds")
 
 
 if __name__ == "__main__":

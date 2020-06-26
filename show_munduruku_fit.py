@@ -1,4 +1,4 @@
-from routines.get_term_num_matrix import get_term_num_matrix, get_num_term_pt
+from get_term_num_matrix import get_term_num_matrix, get_num_term_pt
 from routines.compute_P_w_i_bias_correct_subitized import compute_P_w_i_bias_correct_subitized, compute_P_w_i_bias_correct, compute_P_w_i_size_principle
 import math
 import itertools
@@ -11,19 +11,20 @@ sys.path.insert(0, "routines")
 plt.style.use("seaborn-colorblind")
 
 
-def show_munduruku_fit(percent_file, terms_file, term_interp_file, w=0.31, model="subitize", out_name="mund_comp"):
+def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subitize"):
     # Data is from Pica(2004)
     subrange = [1, 2, 3]
     mu_range = []
     mu_range.extend(range(1, 16))
+    w = 0.31
     c = 1 / (math.sqrt(2)*w)
 
     numberline = mu_range
     percent = np.loadtxt(open(percent_file, "rb"),
                          delimiter=",").astype("float")
-    terms = np.loadtxt(open(terms_file, "rb"), delimiter=",", dtype="str")
+    terms = np.loadtxt(open(terms_file, "rb"), delimiter=",", dtype="string")
     term_interp = np.loadtxt(open(term_interp_file, "rb"),
-                             delimiter=",", dtype="str")
+                             delimiter=",", dtype="string")
     nnum, ncat = 15, terms.shape[0]
 
     bias = 55 * percent
@@ -100,13 +101,13 @@ def show_munduruku_fit(percent_file, terms_file, term_interp_file, w=0.31, model
     ax_model.set_yticks([0.1 * x for x in range(0, 11)])
     ax_model.set_ybound((0, 1))
     plt.tight_layout()
-    plt.savefig(f"{out_name}.png", dpi=1000, bbox_extra_artists=(
+    plt.savefig("mund_comp_nosub.png", dpi=1000, bbox_extra_artists=(
         lgd, lab_a, lab_b), bbox_inches="tight")
-    plt.savefig(f"{out_name}.eps", dpi=1000, bbox_extra_artists=(
+    plt.savefig("mund_comp_nosub.eps", dpi=1000, bbox_extra_artists=(
         lgd, lab_a, lab_b), bbox_inches="tight")
     
 
 
 if __name__ == "__main__":
     show_munduruku_fit("data/munduruku_pica2004/percent.csv", "data/munduruku_pica2004/terms.csv",
-                       "data/munduruku_pica2004/term_interp.csv", w=0.15, model="subitize", out_name="mund0.15")
+                       "data/munduruku_pica2004/term_interp.csv", model="no_subitize")
