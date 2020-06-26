@@ -109,14 +109,9 @@ if __name__ == "__main__":
     for base in range(2, 50):
         rules = make_rules_up_to_base(base)
         rules = make_general_rules(base, 1000, rules)
-        print("== Base {} ==".format(base))
-        for rule in rules:
-            print(RenderTree(rule, style=AsciiStyle()))
-        #forest_disp(rules, str(base))
         comp = calc_complexity(rules)
-        print(comp)
         complexities.append(comp)
-    print(complexities)
+    print(enumerate(complexities))
 
     plot_complexities(0, 50, complexities, filename="complexities_1000")
     
