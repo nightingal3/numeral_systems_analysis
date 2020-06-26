@@ -71,13 +71,13 @@ alternate_order = dict(
 )
 
 # Need probabilities
-need_probs = dict(
-    eng=parse_need_prob("data/need_probs/eng_num_pos.csv"),
-    eng_1000=parse_need_prob("data/need_probs/chn_1_to_1000.csv"),
-    uni=parse_need_prob("data/need_probs/total_need_prob_num.csv"),
-    mand=parse_need_prob("data/need_probs/chinese_need_prob.csv"),
-    ger=parse_need_prob("data/need_probs/german_need_prob.csv"),
-    spa=parse_need_prob("data/need_probs/spanish_need_prob.csv"),
-    ita=parse_need_prob("data/need_probs/italian_num_pos.csv"),
-    fre=parse_need_prob("data/need_probs/french_need_prob.csv"),
-    uniform=)
+# need_probs = dict(
+#     eng=parse_need_prob("data/need_probs/eng_num_pos.csv"),
+#     eng_1000=parse_need_prob("data/need_probs/chn_1_to_1000.csv"),
+#     uni=parse_need_prob("data/need_probs/total_need_prob_num.csv"),
+#     mand=parse_need_prob("data/need_probs/chinese_need_prob.csv"),
+#     ger=parse_need_prob("data/need_probs/german_need_prob.csv"),
+#     spa=parse_need_prob("data/need_probs/spanish_need_prob.csv"),
+#     ita=parse_need_prob("data/need_probs/italian_num_pos.csv"),
+#     fre=parse_need_prob("data/need_probs/french_need_prob.csv"),
+#     uniform=parse_need_prob("data/need_probs/needprobs_eng_fit_1.csv"))
