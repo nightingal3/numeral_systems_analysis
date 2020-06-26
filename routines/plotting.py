@@ -20,8 +20,8 @@ def plot_uid(attested_uid_dev, alternate_uid_dev, langname, attested_color="red"
     x_alt, y_alt = zip(*alternate_list)
     ax = plt.subplot(111)
 
-    plt.bar(x_alt, y_alt, color="green", label="Alternate order", alpha=0.5)
-    plt.bar(x, y, color="red", label="Attested order", alpha=0.5)
+    plt.bar(x_alt, y_alt, color="green", label="Alternate", alpha=0.5)
+    plt.bar(x, y, color="red", label="Preferred", alpha=0.5)
     # Hide the right and top spines
     #ax.spines['right'].set_visible(False)
     #ax.spines['top'].set_visible(False)
@@ -30,20 +30,20 @@ def plot_uid(attested_uid_dev, alternate_uid_dev, langname, attested_color="red"
     ax.yaxis.set_ticks_position('left')
     ax.xaxis.set_ticks_position('bottom')
 
-    plt.xlabel("Number", fontsize=font_sizes["BIG_SIZE"], labelpad=10)
+    plt.xlabel("Number", fontsize=font_sizes["JUMBO_SIZE"], labelpad=10)
     plt.xlim(10, 100)
     plt.ylim(0, 1)
-    plt.subplots_adjust(bottom=0.15)
+    #plt.subplots_adjust(bottom=0.15)
     currentAxis = plt.gca()
-    currentAxis.add_patch(
-        Rectangle((10, 0), 10, 1, fill=None, color="#d8ac31", linewidth=3))
-    plt.xticks(fontsize=font_sizes["MEDIUM_SIZE"])
-    plt.yticks(fontsize=font_sizes["MEDIUM_SIZE"])
-    plt.ylabel("UID deviation score", fontsize=font_sizes["BIG_SIZE"])
+    #currentAxis.add_patch(
+        #Rectangle((10, 0), 10, 1, fill=None, color="#d8ac31", linewidth=3))
+    plt.xticks(fontsize=font_sizes["MEDIUM_LARGE_SIZE"])
+    plt.yticks(fontsize=font_sizes["MEDIUM_LARGE_SIZE"])
+    plt.ylabel("UID deviation score", fontsize=font_sizes["JUMBO_SIZE"])
     plt.legend(
-        prop={"size": font_sizes["MEDIUM_LARGE_SIZE"]}, loc="upper right")
-    plt.title("Uniform information density (UID)",
-              fontsize=font_sizes["BIG_SIZE"])
+        prop={"size": font_sizes["BIG_SIZE"]}, loc="upper right")
+    #plt.title("Uniform information density (UID)",
+              #fontsize=font_sizes["JUMBO_SIZE"] + 1)
     plt.savefig(langname + "_100_num_UID_dev.png")
     plt.savefig(langname + "_100_num_UID_dev.pdf")
     plt.tight_layout()
@@ -75,10 +75,10 @@ def plot_area(area_dict, langname, maxval):
         points_alt_y.append(area_dict[first][num])
     if langname == "Template":
         plt.bar(points_alt_x, points_alt_y, color="green",
-                label="atom-base", alpha=0.5)
+                label="Alternate", alpha=0.5)
     else:
         plt.bar(points_alt_x, points_alt_y, color="green",
-                label="Alternate order", alpha=0.5)
+                label="Alternate", alpha=0.5)
 
     points_x = []
     points_y = []
@@ -88,10 +88,10 @@ def plot_area(area_dict, langname, maxval):
         points_x.append(num)
         points_y.append(area_dict[second][num])
     if langname == "Template":
-        plt.bar(points_x, points_y, color="red", label="base-atom", alpha=0.5)
+        plt.bar(points_x, points_y, color="red", label="Preferred", alpha=0.5)
     else:
         plt.bar(points_x, points_y, color="red",
-                label="Attested order", alpha=0.5)
+                label="Preferred", alpha=0.5)
 
     #ax = plt.subplot(111)
 
@@ -102,13 +102,13 @@ def plot_area(area_dict, langname, maxval):
     #currentAxis = plt.gca()
     # currentAxis.add_patch(Rectangle((10, 0), 10, 25, fill=None, color="#d8ac31", linewidth=3))
 
-    plt.xlabel("Number", fontsize=font_sizes["BIG_SIZE"])
-    plt.xticks(fontsize=font_sizes["MEDIUM_SIZE"])
+    plt.xlabel("Number", fontsize=font_sizes["JUMBO_SIZE"])
+    plt.xticks(fontsize=font_sizes["MEDIUM_LARGE_SIZE"])
     plt.xlim(10, 100)
-    plt.yticks(fontsize=font_sizes["MEDIUM_SIZE"])
-    plt.ylabel("Cumulative surprisal (bits)", fontsize=font_sizes["BIG_SIZE"])
-    plt.legend(prop={"size": font_sizes["MEDIUM_SIZE"]}, loc="upper right")
-    plt.title("Rapid information gain (RIG)", fontsize=font_sizes["BIG_SIZE"])
+    plt.yticks(fontsize=font_sizes["MEDIUM_LARGE_SIZE"])
+    plt.ylabel("Cumulative surprisal (bits)", fontsize=font_sizes["JUMBO_SIZE"])
+    plt.legend(prop={"size": font_sizes["BIG_SIZE"]}, loc="upper right")
+    #plt.title("Rapid information gain (RIG)", fontsize=font_sizes["JUMBO_SIZE"] + 2)
     plt.subplots_adjust(bottom=0.15)
     plt.savefig("Area_" + langname + ".png")
     plt.savefig("Area_" + langname + ".pdf")
@@ -149,7 +149,7 @@ def plot_avg_bars(dict1, dict2, lang, plt=True):
         plt.gcf().clear()
         plt.title("Cumulative surprisal (range of 10)", fontsize="x-large")
         plt.bar([num for num in sorted(costs_1.keys())], final_1,
-                yerr=mse_1, width=3, color="red", alpha=0.75, label="Attested")
+                yerr=mse_1, width=3, color="red", alpha=0.75, label="Preferred")
         plt.bar([num + 3 for num in sorted(costs_2.keys())], final_2,
                 yerr=mse_2, width=3, color="green", alpha=0.75, label="Alternate")
         plt.legend(fontsize="x-large")
@@ -187,13 +187,13 @@ def plot_mini(info_trajs, langname, color1=colors["blue"], color2=colors["orange
             title = '"ten five" (15)'
         elif num == 35:
             title = '"thirty five" (35)'
-        plt.title(title, fontsize=font_sizes["JUMBO_SIZE"])
+        plt.title(title, fontsize=font_sizes["JUMBO_SIZE"] + 4)
         length = len(info_trajs[langname][num])
         numberline = [i for i in range(length)]
         plt.plot(numberline, info_trajs[langname][num],
-                 color=color1, label="base-atom", linewidth=2)
+                 color=color1, label="Preferred", linewidth=2)
         plt.plot(numberline, info_trajs[alt][num],
-                 color=color2, label="atom-base", linewidth=2)
+                 color=color2, label="Alternate", linewidth=2)
         uid_traj = [info_trajs[langname][num][0]]
 
         frac = info_trajs[langname][num][0] / (length - 1)
@@ -201,17 +201,19 @@ def plot_mini(info_trajs, langname, color1=colors["blue"], color2=colors["orange
             uid_traj.append(info_trajs[langname][num][0] - i * frac)
         uid_traj.append(0)
 
-    plt.plot(numberline, uid_traj, color="red",
-             linestyle="dotted", label="UID", linewidth=2)
-    name = root_dir + langname + "/" + str(num) + ext
-    plt.xlabel("Number of consitutents", fontsize=font_sizes["JUMBO_SIZE"])
-    plt.xticks(numberline, fontsize=font_sizes["MEDIUM_SIZE"])
-    plt.yticks(fontsize=font_sizes["MEDIUM_SIZE"])
-    plt.ylabel("Surprisal (bits)", fontsize=font_sizes["JUMBO_SIZE"])
-    plt.legend(fontsize=font_sizes["BIG_SIZE"])
-    # plt.tight_layout()
-    plt.savefig(name)
-    plt.gcf().clear()
+        plt.plot(numberline, uid_traj, color="red",
+                linestyle="dotted", label="UID", linewidth=2)
+        name = root_dir + langname + "/" + str(num) + ext
+        plt.xlabel("Number of consitutents", fontsize=font_sizes["JUMBO_SIZE"] + 4)
+        plt.xticks(numberline, fontsize=font_sizes["BIG_SIZE"])
+        plt.yticks(fontsize=font_sizes["MEDIUM_SIZE"])
+        plt.ylabel("Surprisal (bits)", fontsize=font_sizes["JUMBO_SIZE"] + 4)
+        plt.legend(fontsize=font_sizes["BIG_SIZE"])
+        plt.tight_layout()
+
+        plt.savefig(name)
+        print(name)
+        plt.gcf().clear()
 
 
 def plot_bounding_box(ax, bound_range, area_dict, color="#d8ac31", linewidth=3):
