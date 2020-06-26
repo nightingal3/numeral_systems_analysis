@@ -1,9 +1,9 @@
 import numpy as np
-from get_term_num_matrix import get_term_num_matrix
-from compute_P_w_i_variants import *
+from .get_term_num_matrix import get_term_num_matrix
+from .compute_P_w_i_variants import *
 import math
-from find import find
-
+from .find import find
+import pdb
 
 def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_range=range(20), w=0.31):
 
@@ -34,6 +34,7 @@ def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_rang
 
     log_prob_L = np.log2(log_prob_L)
     c = np.sum(np.multiply(nd, -log_prob_L))
+    #pdb.set_trace()
     return c
 
 
@@ -77,8 +78,10 @@ def compute_cost_size_principle_arb(modemap, need_prob):
 
 
 if __name__ == "__main__":
-    f = open("../data/need_probs/needprobs_eng_fit.csv")
-    nd = [float(i) for i in f.read().split("\r\n")[:-1]]
-    print(compute_approx_cost(["hoi1", "hoi2", "aibaagi"], [i for i in range(
-        1, 101)], [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, nd, [i for i in range(20)], 0.31))
-    print(compute_cost_size_principle(3, nd))
+    f = open("./data/need_probs/needprobs_eng_fit.csv")
+    nd = [float(i) for i in f.read().split("\n")[:-1]]
+    #print(compute_approx_cost(["hoi1", "hoi2", "aibaagi"], [i for i in range(
+        #1, 101)], [1, 2, 2, 2, 3, 3, 3, 3, 3, 3], 0, nd, [i for i in range(20)], 0.31))
+    #print(compute_cost_size_principle(3, nd))
+
+    print(compute_approx_cost(["bla", "bla1", "bla2"], [i for i in range(1, 101)], [1] * 50 + [2] + [3] * 48, 1, nd, [i for i in range(101)], 0.31))

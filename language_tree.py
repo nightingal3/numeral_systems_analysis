@@ -172,8 +172,8 @@ def calc_complexity(forest):
 
 
 def disp(tree, filename=None):
-    if filename:
-        RenderTreeGraph(tree).to_picture(os.path.abspath(filename + ".png"))
+    #if filename != None:
+        #RenderTreeGraph(tree).to_picture(os.path.abspath(filename + ".png"))
     return RenderTree(tree)
 
 
@@ -189,7 +189,8 @@ def print_grammar(forest, num_type, langcode):
     num_types = {"0": "restricted approximate", "1": "restricted exact", "2": "body part",
                  "3": "other base", "4": "vigesimal", "5": "hybrid", "6": "decimal"}
     langcodes = {"acg": "Achagua", "ain": "Ainu", "ana": "Araona", "awp": "Awa Pit", "brs": "Barasuno", "bae": "Bar" + u'\u00E9', "eng": "English", "geo": "Georgian", "goo": "Gooniyandi", "hix": "Hixkaryana", "hpd": "Hup", "imo": "Imonda", "kay": "Kayardild",
-                 "mnd": "Mandarin", "myi": "Mangarrayi", "mrt": "Martuthunira", "pit": "Pitjantjatjara", "prh": "Pirah" u'\u00E3', "ram": "Rama", "war": "Wari", "wsk": "Waskia", "wch": "Wichu'00ED'", "yid": "Yidiny", "xoo": u'\u0021' + "X" + u'\u00F3' + u'\u00F5'}
+                 "mnd": "Mandarin", "myi": "Mangarrayi", "mrt": "Martuthunira", "pit": "Pitjantjatjara", "prh": "Pirah" u'\u00E3', "ram": "Rama", "war": "Wari", "wsk": "Waskia", "wch": "Wichu'00ED'", "yid": "Yidiny", "xoo": u'\u0021' + "X" + u'\u00F3' + u'\u00F5',
+                 "fre": "French", "spa": "Spanish"}
 
     print(langcodes[langcode] + ": \t {")
     print("type: " + num_types[str(num_type)])
@@ -208,7 +209,11 @@ if __name__ == "__main__":
     for l in selected_25:
         print(l + ":")
         print(build_language(l, True))"""
-    #print_grammar(None, 1, "eng")
+    forest = build_language("ain", prnt=True)
+    print(forest)
+    assert False
+
+    print(print_grammar(forest, 6, "mnd"))
 
     root = Node("=")
 

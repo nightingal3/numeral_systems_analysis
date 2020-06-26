@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from find import find
+from .find import find
 
 
 def compute_P_w_i_bias_correct_subitized(nnum, ncat, mus, c, w, total_mass, subrange, bias):

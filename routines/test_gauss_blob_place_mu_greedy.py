@@ -1,9 +1,9 @@
 import numpy as np
 import math
 from random import randint
-from compute_cost import compute_f_i_w_numerator
-from find import *
-
+from .compute_cost import compute_f_i_w_numerator
+from .find import *
+import pdb
 
 def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, need_probs, nsamp, optdir, subrange=[i for i in range(3)]):
     comp_perm = []
@@ -12,7 +12,7 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
     ccost_perm_ns = []
 
     mus_init = [i for i in range(
-        1, max(mu_range), max(mu_range)/(nterm+2))][1:-1]
+        1, max(mu_range), int(max(mu_range)/(nterm+2)))][1:-1]
 
     for ii in range(20):
         mus = np.asarray(np.random.permutation(
@@ -28,7 +28,7 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
                     coin = randint(0, 1)
                     mus_propose, _ = propose_mus(
                         mus, max(mu_range), seq[i], coin)
-                    ccost_perm_t, ccost_perm_ns_t, comp_perm_t, comp_perm_ns_t = compute_cost_comp(
+                    ccost_perm_t, ccost_perm_ns_t, comp_perm_t, comp_perm_ns_t, term_num_map = compute_cost_comp(
                         nnum, nterm, numberline, mus, c, w, need_probs, subrange)
                     if optdir < 0:
                         flag = ccost_perm_t < cost_prev
@@ -37,13 +37,16 @@ def test_gauss_blob_place_mu_greedy(nnum, nterm, numberline, mu_range, c, w, nee
 
                     if flag:
 
-                        comp_perm.extend([comp_perm_t, comp_perm_ns_t])
-                        ccost_perm.extend([ccost_perm_t, ccost_perm_ns_t])
+                        #comp_perm.extend([comp_perm_t, comp_perm_ns_t])
+                        #ccost_perm.extend([ccost_perm_t, ccost_perm_ns_t])
+                        comp_perm.append(comp_perm_t)
+                        ccost_perm.append(ccost_perm_t)
                         curr_diff = abs(cost_prev - ccost_perm_t)
                         cost_prev = ccost_perm_t
                         mus = mus_propose
+                        best_term_num_map = term_num_map
 
-    return comp_perm, ccost_perm, mus
+    return comp_perm, ccost_perm, mus, best_term_num_map
 
 
 def compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange):
@@ -64,7 +67,7 @@ def compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange):
 
     for diff_ind in find_diff(numberline, find(sum(term_num_map), 1)):
         term_num_map[nterm - 1, diff_ind - 1] = 1
-
+        
     mmap = np.argmax(term_num_map, 0)
     log_prob_L = np.zeros((1, nnum))
 
@@ -74,14 +77,14 @@ def compute_cost_comp(nnum, nterm, numberline, mus, c, w, need_probs, subrange):
         for ind in range(len(cat_inds)):
             log_prob_L[0, cat_inds[ind]] = (f[ind] / sum(f))
     log_prob_L = np.log2(log_prob_L)
-
+    #pdb.set_trace()
     ccost_perm = np.sum(np.asarray(need_probs) * -log_prob_L[0])
     ccost_perm_ns = ccost_perm
 
     comp_perm = compute_subitized_complex(subrange, mmap, nterm)
     comp_perm_ns = 3 * len(find_unique(mmap))
 
-    return ccost_perm, ccost_perm_ns, comp_perm, comp_perm_ns
+    return ccost_perm, ccost_perm_ns, comp_perm, comp_perm_ns, mmap
 
 
 def propose_mus(mus, maxval, i, optdir):
@@ -130,11 +133,10 @@ def compute_subitized_complex(subrange, mmap, nterm):
 
 
 def main():
-    need_probs = open("../data/need_probs/needprobs_eng_fit.csv",
-                      "r").read().split("\r\n")[:-1]
+    need_probs = open("./data/need_probs/needprobs_eng_fit.csv",
+                      "r").read().split("\n")[:-1]
     need_probs = [float(i) for i in need_probs]
-    print(test_gauss_blob_place_mu_greedy(100, 2, [i for i in range(1, 101)], [
-          i for i in range(1, 101)], 2.2810, 0.31, need_probs, 100, -1, [1, 2, 3]))
+    print(compute_cost_comp(100, 2, [i for i in range(1, 101)], [15, 20], 2.28, 0.31, need_probs, range(3)))
 
 
 if __name__ == "__main__":

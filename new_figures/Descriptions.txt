@@ -1,0 +1,5 @@
+base_complexities: This should replace Figure 5 in supplementary materials. Caption can be the same: "Complexity of canonical recursive numeral systems with different bases"
+cvc_w_0.15: This is the complexity vs. cost tradeoff with a Weber fraction of 0.15
+cvc_w_0.25: Complexity vs. cost tradeoff with Weber fraction of 0.25
+large-figure-ext: Main figure, should replace Figure 3 in the main text. Can add this to the caption: "(C) Sample of several non-optimal hypothetical approximate, exact restricted, and recursive systems, highlighted in pink in (A)"
+mund0.1-0.4: Illustration of Munduruku model behaviour vs. ground truth with different Weber fractions

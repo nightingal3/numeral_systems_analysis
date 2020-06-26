@@ -1,0 +1,9 @@
+background_documents/
+__pycache__/
+.vscode/
+.idea/
+*.png
+*.eps
+*.p
+*.pyc
+*.pdf

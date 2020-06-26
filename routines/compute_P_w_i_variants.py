@@ -1,4 +1,4 @@
-from find import *
+from .find import *
 import itertools
 import math
 import numpy as np
@@ -90,7 +90,7 @@ def compute_P_w_i_match_modemap(cluster, numberline, nterm, term_num_map, mu_ran
 
             log_prob_L = np.log2(log_prob_L)
             cvec.append(sum((need_probs * -log_prob_L)[0]))
-
+    print(cvec)
     ind = inds[find(cvec, min(cvec))[0]]
     mus_match = mu_placements[i, :]
     P_w_i = compute_P_w_i(nnum, nterm, numberline, np.asarray(
