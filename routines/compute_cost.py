@@ -1,8 +1,8 @@
 import numpy as np
-from get_term_num_matrix import get_term_num_matrix
-from compute_P_w_i_variants import *
+from .get_term_num_matrix import get_term_num_matrix
+from .compute_P_w_i_variants import *
 import math
-from find import find
+from .find import find
 
 
 def compute_approx_cost(term, numberline, num_term_pt, end_category, nd, mu_range=range(20), w=0.31):

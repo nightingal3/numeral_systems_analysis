@@ -1,4 +1,4 @@
-from styles import colors
+from styles.colors import colors
 from config import font_sizes
 from num2words import num2words
 import matplotlib.pyplot as plt

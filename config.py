@@ -1,7 +1,15 @@
+# -*- coding: utf-8 -*-
+
 import csv
+import chardet
 
 import pandas as pd
 
+"""with open("data/terms_1_to_100/english.csv", "rb") as f:
+    res = chardet.detect(f.readline())
+    encoding = res["encoding"]"""
+
+encoding = "ISO-8859–1"
 
 def read_file(filename, num_opts):
     f = open(filename, "r")
@@ -38,14 +46,14 @@ font_sizes = dict(
 
 # Terminology
 terms = dict(
-    eng=pd.read_csv("data/terms_1_to_100/english.csv"),
-    eng_1000=pd.read_csv("data/terms_1_to_100/english_1000.csv"),
-    fre=pd.read_csv("data/terms_1_to_100/french.csv"),
-    ger=pd.read_csv("data/terms_1_to_100/german_segmented.csv"),
-    ita=pd.read_csv("data/terms_1_to_100/italian_romanized.csv"),
-    mand=pd.read_csv("data/terms_1_to_100/chinese_romanized.csv"),
-    spa=pd.read_csv("data/terms_1_to_100/spanish_romanized.csv"),
-    uni=pd.read_csv("data/terms_1_to_100/chinese_romanized.csv")
+    eng=pd.read_csv("data/terms_1_to_100/english.csv", encoding=encoding),
+    eng_1000=pd.read_csv("data/terms_1_to_100/english_1000.csv", encoding=encoding),
+    fre=pd.read_csv("data/terms_1_to_100/french.csv", encoding=encoding),
+    ger=pd.read_csv("data/terms_1_to_100/german_segmented.csv", encoding=encoding),
+    ita=pd.read_csv("data/terms_1_to_100/italian_romanized.csv", encoding=encoding),
+    mand=pd.read_csv("data/terms_1_to_100/chinese_romanized.csv", encoding=encoding),
+    spa=pd.read_csv("data/terms_1_to_100/spanish_romanized.csv", encoding=encoding),
+    uni=pd.read_csv("data/terms_1_to_100/chinese_romanized.csv", encoding=encoding)
 )
 
 # Attested/alternate term orderings
@@ -71,13 +79,13 @@ alternate_order = dict(
 )
 
 # Need probabilities
-# need_probs = dict(
-#     eng=parse_need_prob("data/need_probs/eng_num_pos.csv"),
-#     eng_1000=parse_need_prob("data/need_probs/chn_1_to_1000.csv"),
-#     uni=parse_need_prob("data/need_probs/total_need_prob_num.csv"),
-#     mand=parse_need_prob("data/need_probs/chinese_need_prob.csv"),
-#     ger=parse_need_prob("data/need_probs/german_need_prob.csv"),
-#     spa=parse_need_prob("data/need_probs/spanish_need_prob.csv"),
-#     ita=parse_need_prob("data/need_probs/italian_num_pos.csv"),
-#     fre=parse_need_prob("data/need_probs/french_need_prob.csv"),
-#     uniform=parse_need_prob("data/need_probs/needprobs_eng_fit_1.csv"))
+need_probs = dict(
+    eng=parse_need_prob("data/need_probs/eng_num_pos.csv"),
+    eng_1000=parse_need_prob("data/need_probs/chn_1_to_1000.csv"),
+    uni=parse_need_prob("data/need_probs/total_need_prob_num.csv"),
+    mand=parse_need_prob("data/need_probs/chinese_need_prob.csv"),
+    ger=parse_need_prob("data/need_probs/german_need_prob.csv"),
+    spa=parse_need_prob("data/need_probs/spanish_need_prob.csv"),
+    ita=parse_need_prob("data/need_probs/italian_num_pos.csv"),
+    fre=parse_need_prob("data/need_probs/french_need_prob.csv"),
+    )

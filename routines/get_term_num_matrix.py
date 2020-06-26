@@ -1,5 +1,5 @@
 import numpy as np
-from find import find
+from .find import find
 
 
 def get_num_term_pt(numberline, term_boundaries):

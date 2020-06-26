@@ -1,4 +1,4 @@
-from find import *
+from .find import *
 import itertools
 import math
 import numpy as np
