@@ -11,7 +11,7 @@ sys.path.insert(0, "routines")
 plt.style.use("seaborn-colorblind")
 
 
-def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subitize"):
+def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subitize", filename="mund_comp_nosub"):
     # Data is from Pica(2004)
     subrange = [1, 2, 3]
     mu_range = []
@@ -101,9 +101,9 @@ def show_munduruku_fit(percent_file, terms_file, term_interp_file, model="subiti
     ax_model.set_yticks([0.1 * x for x in range(0, 11)])
     ax_model.set_ybound((0, 1))
     plt.tight_layout()
-    plt.savefig("mund_comp_nosub.png", dpi=1000, bbox_extra_artists=(
+    plt.savefig(filename + ".png", dpi=1000, bbox_extra_artists=(
         lgd, lab_a, lab_b), bbox_inches="tight")
-    plt.savefig("mund_comp_nosub.eps", dpi=1000, bbox_extra_artists=(
+    plt.savefig(filename + ".eps", dpi=1000, bbox_extra_artists=(
         lgd, lab_a, lab_b), bbox_inches="tight")
     
 
