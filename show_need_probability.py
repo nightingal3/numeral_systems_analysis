@@ -49,9 +49,6 @@ def gen_fitted_need_probs(filepath, coefficient, exp):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("gen_fitted", help="generate a need probability csv based on specified power law distribution parameters")
-    parser.parse_args()
     gen_fitted_need_probs("data/need_probs/needprobs_eng_fit_1.csv", 0.6182, -3)
     plot_need_probability("data/need_probs/need_probs.csv",
                           "data/need_probs/needprobs_eng_fit_1.csv")
