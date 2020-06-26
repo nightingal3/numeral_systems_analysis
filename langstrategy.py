@@ -507,4 +507,3 @@ def successors(forest, terms, start, end, exclude_beginning=True):
         forest.append(language_tree.make_tree(terms[term_index], c+1, "SUC"))
 
     return forest
-
