@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import math
 import pickle
@@ -212,7 +213,7 @@ def plot_cost_vs_complexity(lang_info, hyp_lang_info, filename, dist_type="norma
     # attested languages
     langcode_to_name = {"ana": "Araona$^1$", "awp": "Awa Pit$^2$", "ram": "Rama$^3$", "war": "Wari", "prh": "Piraha", "goo": "Gooniyandi", "wch": "Wichi",
                         "wsk": "Waskia", "hpd": "Hup", "mnd": "Mandarin", "ain": "Ainu", "eng": "English", "geo": "Georgian", "myu": "Munduruku",
-                        "chi": "Chiquitano", "fuy": "Fuyuge", "knk": "Krenák", "spa": "Spanish", "fre": "French"}
+                        "chi": "Chiquitano", "fuy": "Fuyuge", "knk": "Krenak", "spa": "Spanish", "fre": "French"}
     colorscheme = {1: "green", 6: "blue", 5: "blue", 0: "red"}
 
     if dist_type == "uniform":
@@ -390,13 +391,14 @@ def reconfig_comp_cost(comp_m, cost_m):
 def main():
     c = aggregate_complexities()
     f = open("data/need_probs/needprobs_eng_fit.csv")
-    f1 = open("data/need_probs/needprobs_eng_fit_2.csv")
+    f1 = open("data/need_probs/needprobs_eng_fit_1.csv")
 
     need_probs = [float(i) for i in f.read().split("\n")[:-1]]
     need_probs_uniform = [float(1)/100 for i in range(0, 100)]
     need_probs_steeper = [float(i) for i in f1.read().split("\n")[:-1]]
     
-    aggregate_communicative_costs(need_probs_uniform, c, "attested_bayesian_ext_03.p", w=0.31)
+    if not os.path.isfile("attested_bayesian_03.p"):
+        aggregate_communicative_costs(need_probs_uniform, c, "attested_bayesian_ext_03.p", w=0.31)
     y = generate_hypothetical_systems(
         [i for i in range(1, 101)], 2.28, 0.31, need_probs_uniform)
     pickle.dump(y, open("hypothetical_systems_03.p", "wb"))
