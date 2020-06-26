@@ -157,6 +157,18 @@ def bae():
 
     return forest, num_type, ulim
 
+# Chiquitano - new addition (source: https://mpi-lingweb.shh.mpg.de/numeral/Chiquitano.htm)
+def chi():
+    num_type = 0
+    ulim = None
+    forest = []
+    terms = ["taman", "surumana"]
+
+    forest.append(language_tree.make_tree(terms[0], 1, "ONE"))
+    forest.append(language_tree.make_tree(terms[1], [2, 100], "HIG"))
+    
+    return forest, num_type, ulim
+
 
 def eng():
     num_type = 6
@@ -172,8 +184,8 @@ def eng():
     forest.append(language_tree.make_tree(
         ["u", "-", "ty", "v"], ["u", "ten", "v"], "MTA"))
     forest.append(language_tree.make_tree("hundred", ["ten", "two"], "POW"))
-    forest.append(language_tree.make_tree(
-        "u", ["thir", "four", "fif", "six", "seven", "eigh", "nine"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"u", ["thir", "four", "fif", "six", "seven", "eigh", "nine"], "MEM"))
     forest.append(language_tree.make_tree(
         "v", ["twen", "thir", "for", "fif", "six", "seven", "eigh", "nine"], "MEM"))
     forest.append(language_tree.make_tree("w", [
@@ -186,6 +198,53 @@ def eng():
 
     return forest, num_type, ulim
 
+# Fuyuge - new addition from Hammarstrom 3.1.1
+def fuy():
+    num_type = 0
+    ulim = None
+    forest = []
+    terms = ["fidan", "yovalo", "yovalo hul mindan",  "hukas"]
+
+    forest.append(language_tree.make_tree(terms[0], 1, "ONE"))
+    forest.append(language_tree.make_tree(terms[1], 2, "GAU"))
+    forest.append(language_tree.make_tree(terms[2], 3, "GAU"))
+    forest.append(language_tree.make_tree(terms[3], [4, 100], "HIG"))
+
+    return forest, num_type, ulim
+
+
+def fre():
+    num_type = 5
+    ulim = None
+    forest = []
+    terms = ["un", "deux", "trois", "quatre", "cinq", "six",
+             "sept", "huit", "neuf", "dix", "onze", "douze", "treize", 
+             "quatorze", "quinze", "seize"]
+
+    forest = first_three(forest, terms)
+    forest = successors(forest, terms, 3, 16)
+    forest.append(language_tree.make_tree(["u", "-", "v"], ["u", "v"], "ADD"))
+    forest.append(language_tree.make_tree(["quatre", "vingts"], ["quatre", "vingt"], "MUL"))
+    forest.append(language_tree.make_tree(["quatre-vingts" "-", "x"], ["quatre-vingt", "x"], "ADD"))
+    #forest.append(language_tree.make_tree(["dix-", "w"], ["dix", "w"], "ADD"))
+    forest.append(language_tree.make_tree(
+        "u", ["vingt", "trente", "quarante", "cinquante", "soixante"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"v", terms + ["dix-sept", "dix-huit", "dix-neuf"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"w", ["sept", "huit", "neuf"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"x", terms + ["dix-sept", "dix-huit", "dix-neuf"], "MEM"
+    #))
+    forest.append(language_tree.make_tree("et-un", "un", "EQU"))
+    forest.append(language_tree.make_tree("dix-", "dix", "EQU"))
+    forest.append(language_tree.make_tree("cent", ["dix", "deux"], "POW"))
+
+    forest.append(language_tree.make_tree("digits", ["un", "deux", "trois", "quatre", "cinq", "six",
+             "sept", "huit", "neuf", "onze", "douze", "treize", 
+             "quatorze", "quinze", "seize"], "MEM"))
+
+    return forest, num_type, ulim
 
 def geo():
     num_type = 5
@@ -214,10 +273,10 @@ def geo():
     forest.append(language_tree.make_tree(
         ["v", "da", "-", "u"], ["v", "u"], "ADD"))
     forest.append(language_tree.make_tree("as-i", ["at-i", "or-i"], "POW"))
-    forest.append(language_tree.make_tree(
-        "w", ["ert -i", "or -i", "otx -i", "xut -i", "ekvs -i", "vra -i"], "MEM"))
-    forest.append(language_tree.make_tree(
-        "v", ["oc-", "or-m-oc", "sam-oc-", "otx-m-oc"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"w", ["ert -i", "or -i", "otx -i", "xut -i", "ekvs -i", "vra -i"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"v", ["oc-", "or-m-oc", "sam-oc-", "otx-m-oc"], "MEM"))
     forest.append(language_tree.make_tree("u", ["1-[digit for brevity]", "2", "3", "4", "5",
                                                 "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"], "MEM"))
 
@@ -311,6 +370,19 @@ def kay():
 
     return forest, num_type, ulim
 
+# Krenak - new addition
+def knk():
+    num_type = 1
+    ulim = 3
+    forest = []
+    terms = ["putchik", "narimbo", "krutuip", "inhauit", "kuan"]
+
+    forest = first_three(forest, terms)
+    forest.append(language_tree.make_tree(terms[3], 4, "SUC"))
+    forest.append(language_tree.make_tree(terms[4], [5, 100], "HIG"))
+
+    return forest, num_type, ulim
+
 
 def mnd():
     num_type = 6
@@ -325,10 +397,10 @@ def mnd():
     forest.append(language_tree.make_tree(["u", "v"], ["u", "v"], "ADD"))
     forest.append(language_tree.make_tree("bai3", ["shi2", "er4"], "POW"))
 
-    forest.append(language_tree.make_tree(
-        "u", ["er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3"], "MEM"))
-    forest.append(language_tree.make_tree("v", [
-                  "shi2", "er4shi2", "san1shi2", "si4shi2", "wu3shi2", "liu4shi2", "qi1shi2", "ba1shi2", "jiu3shi2"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"u", ["er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3"], "MEM"))
+    #forest.append(language_tree.make_tree("v", [
+                  #"shi2", "er4shi2", "san1shi2", "si4shi2", "wu3shi2", "liu4shi2", "qi1shi2", "ba1shi2", "jiu3shi2"], "MEM"))
     forest.append(language_tree.make_tree(
         "w", ["yi1", "er4", "san1", "si4", "wu3", "liu4", "qi1", "ba1", "jiu3"], "MEM"))
 
@@ -411,6 +483,39 @@ def ram():
     forest = first_three(forest, terms)
     forest = successors(forest, terms, 3, 5)
     forest.append(language_tree.make_tree(terms[4], [6, 100], "HIG"))
+
+    return forest, num_type, ulim
+
+def spa():
+    num_type = 6
+    ulim = None
+    forest = []
+    terms = ["uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez",
+    "once", "doce", "trece", "catorce", "quinze"]
+
+    forest = first_three(forest, terms)
+    forest = successors(forest, terms, 3, 15)
+    forest.append(language_tree.make_tree(["u", "v"], ["u", "v"], "ADD"))
+    forest.append(language_tree.make_tree(["w", "y", "v"], ["w", "v"], "ADD"))
+    forest.append(language_tree.make_tree("cien", ["diez", "dos"], "POW"))
+    
+    #forest.append(language_tree.make_tree(
+        #"x", ["seis", "siete", "ocho", "nueve"], "MEM"))
+    #forest.append(language_tree.make_tree(
+        #"u", ["veinti", "treinta", "cuaranta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"],
+    #"MEM"))
+    forest.append(language_tree.make_tree(
+        "v", ["uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"], "MEM"
+    ))
+    forest.append(language_tree.make_tree(
+        "w", ["dieci", "veinti", "treinta", "cuaranta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"],
+    "MEM"))
+    
+    forest.append(language_tree.make_tree("diez", "dieci", "EQU"))
+    forest.append(language_tree.make_tree("thir", "three", "EQU"))
+    forest.append(language_tree.make_tree("for", "four", "EQU"))
+    forest.append(language_tree.make_tree("fif", "five", "EQU"))
+    forest.append(language_tree.make_tree("eigh", "eight", "EQU"))
 
     return forest, num_type, ulim
 
