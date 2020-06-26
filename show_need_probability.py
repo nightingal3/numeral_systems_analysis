@@ -40,6 +40,7 @@ def plot_need_probability(filepath, filepath_fit):
 def gen_fitted_need_probs(filepath, coefficient, exp):
     # original fitted line is 0.6182x^-2.02
     y = [coefficient * i ** exp for i in range(1, 101)]
+    y = [num / sum(y) for num in y]
     with open(filepath, "w") as np_file:
         writer = csv.writer(np_file)
         for num in y:
@@ -47,6 +48,6 @@ def gen_fitted_need_probs(filepath, coefficient, exp):
 
 
 if __name__ == "__main__":
-    #gen_fitted_need_probs("data/need_probs/needprobs_eng_fit_1.csv", 0.8, -2.02)
-    plot_need_probability("data/need_probs/need_probs.csv",
-                          "data/need_probs/needprobs_eng_fit_1.csv")
+    gen_fitted_need_probs("data/need_probs/needprobs_eng_fit_1.csv", 0.6182, -3)
+    #plot_need_probability("data/need_probs/need_probs.csv",
+                          #"data/need_probs/needprobs_eng_fit_1.csv")
