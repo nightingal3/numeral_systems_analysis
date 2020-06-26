@@ -1,4 +1,4 @@
-from get_term_num_matrix import get_term_num_matrix, get_num_term_pt
+from routines.get_term_num_matrix import get_term_num_matrix, get_num_term_pt
 from routines.compute_P_w_i_bias_correct_subitized import compute_P_w_i_bias_correct_subitized, compute_P_w_i_bias_correct, compute_P_w_i_size_principle
 import math
 import itertools
